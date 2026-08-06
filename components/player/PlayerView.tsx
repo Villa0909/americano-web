@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 
 import PlayerCard from "@/components/shares/templates/PlayerCard";
-import ShareModal from "@/components/share/ShareModal";
 
 interface Props {
   player: any;
@@ -16,8 +15,8 @@ export default function PlayerView({
 }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [open, setOpen] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [generating, setGenerating] =
+    useState(false);
 
   function isMobileDevice() {
     const mobileUserAgent =
@@ -72,7 +71,7 @@ export default function PlayerView({
         try {
           await image.decode();
         } catch {
-          // Safari puede rechazar decode aunque ya haya cargado.
+          // Safari puede fallar aunque la imagen ya esté cargada.
         }
       }),
     );
@@ -92,8 +91,6 @@ export default function PlayerView({
     await document.fonts.ready;
     await waitForImages(cardRef.current);
 
-    // Dejamos que Safari pinte completamente
-    // las imágenes y las fuentes.
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -138,8 +135,8 @@ export default function PlayerView({
       return;
     }
 
-    // Respaldo: abre la imagen generada.
-    const imageUrl = URL.createObjectURL(blob);
+    const imageUrl =
+      URL.createObjectURL(blob);
 
     window.location.href = imageUrl;
 
@@ -205,45 +202,14 @@ export default function PlayerView({
 
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-4 z-40 rounded-full bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-xl active:scale-95 sm:bottom-8 sm:right-8 sm:rounded-xl sm:px-6 sm:text-base"
+        disabled={generating}
+        onClick={() => void downloadCard()}
+        className="fixed bottom-5 right-4 z-40 rounded-full bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-xl transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:bottom-8 sm:right-8 sm:rounded-xl sm:px-6 sm:text-base"
       >
-        Compartir
+        {generating
+          ? "Generando..."
+          : "Compartir"}
       </button>
-
-      <ShareModal
-        open={open}
-        onClose={() => setOpen(false)}
-        player={player}
-        onDownload={(type) => {
-          switch (type) {
-            case "player":
-              void downloadCard();
-              break;
-
-            case "mvp":
-              alert("MVP próximamente");
-              break;
-
-            case "result":
-              alert("Resultado próximamente");
-              break;
-
-            case "stats":
-              alert(
-                "Estadísticas próximamente",
-              );
-              break;
-          }
-        }}
-      />
-
-      {/*
-        La tarjeta usa exactamente PlayerCard y PlayerStats.
-
-        No usamos opacity: 0 porque Safari puede omitir
-        elementos invisibles durante la captura.
-      */}
 
       <div
         aria-hidden="true"
@@ -251,18 +217,18 @@ export default function PlayerView({
       >
         <div ref={cardRef}>
           <PlayerCard
-  nombre={player.nombre}
-  numero={player.numero}
-  foto={player.foto}
-  posicion={player.posicion}
-  partidos={player.partidos}
-  goles={player.goles}
-  asistencias={player.asistencias}
-  mvps={player.mvps ?? 0}
-  porteriasCero={
-    player.porterias_cero ?? 0
-  }
-/>
+            nombre={player.nombre}
+            numero={player.numero}
+            foto={player.foto}
+            posicion={player.posicion}
+            partidos={player.partidos}
+            goles={player.goles}
+            asistencias={player.asistencias}
+            mvps={player.mvps ?? 0}
+            porteriasCero={
+              player.porterias_cero ?? 0
+            }
+          />
         </div>
       </div>
     </>
