@@ -1,4 +1,4 @@
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
 
 import PlayerStats from "../ui/PlayerStats";
 
@@ -15,17 +15,17 @@ interface Props {
   numero: number;
   foto: string;
 
-  posicion: "Portero" | "Defensa" | "Mediocampista" | "Delantero";
+  posicion:
+    | "Portero"
+    | "Defensa"
+    | "Mediocampista"
+    | "Delantero";
 
   partidos: number;
   goles: number;
   asistencias: number;
   mvps: number;
 }
-
-/* ==========================================
-              CONFIGURACIÓN
-========================================== */
 
 /* FOTO */
 
@@ -53,11 +53,8 @@ const NAME = {
 const POSITION = {
   x: 50,
   y: 50,
-
   size: 110,
-
   opacity: 0.4,
-
   rotate: 0,
 };
 
@@ -67,7 +64,7 @@ const NUMBER = {
   x: 260,
   y: 400,
   size: 520,
-  opacity: 0.10,
+  opacity: 0.1,
   rotate: 0,
 };
 
@@ -85,10 +82,8 @@ const LIGHT = {
 const STATS = {
   x: 550,
   y: 130,
-
   xDouble: 520,
   yDouble: 180,
-
   opacity: 1,
 };
 
@@ -98,7 +93,7 @@ const FOOTER = {
   x: 740,
   y: 45,
   size: 28,
-  opacity: 0.70,
+  opacity: 0.7,
 };
 
 export default function PlayerCard({
@@ -111,216 +106,47 @@ export default function PlayerCard({
   asistencias,
   mvps,
 }: Props) {
-  
-    const numberRight =
-  numero < 10 ? 320 : NUMBER.x;
+  const numberRight =
+    numero < 10 ? 320 : NUMBER.x;
+
+  const positionText = {
+    Portero: "POR",
+    Defensa: "DEF",
+    Mediocampista: "MED",
+    Delantero: "DEL",
+  } as const;
+
+  const posicionAbreviada =
+    positionText[posicion];
+
   const stats = [
-  {
-    icon: <CalendarDays size={38} className="text-white" />,
-    value: partidos,
-  },
-  {
-    icon: <PiSoccerBallFill size={38} className="text-white" />,
-    value: goles,
-  },
-  {
-    icon: <SportShoe size={38} className="text-white" />,
-    value: asistencias,
-  },
-  {
-    icon: (
-      <Star
-        size={38}
-        className="text-yellow-400"
-        fill="currentColor"
-      />
-    ),
-    value: mvps,
-  },
-].filter((stat) => stat.value > 0);
-<div
-  style={{
-    left: stats.length === 2 ? STATS.xDouble : STATS.x,
-    bottom: stats.length === 2 ? STATS.yDouble : STATS.y,
-    opacity: STATS.opacity,
-  }}
-  className="absolute z-40"
->
-  <PlayerStats stats={stats} />
-</div>
-const positionText = {
-  Portero: "POR",
-  Defensa: "DEF",
-  Mediocampista: "MED",
-  Delantero: "DEL",
-} as const;
-
-const posicionAbreviada = positionText[posicion];
-  return (
-    <div className="relative h-[1350px] w-[1080px] overflow-hidden">
-
-      {/* ==========================================
-                    FONDO
-      ========================================== */}
-
-      <Image
-        src="/templates/player-bg.png"
-        alt=""
-        fill
-        priority
-        className="object-cover"
-      />
-
-{/* ==========================================
-              POSICIÓN
-========================================== */}
-
-<h2
-  style={{
-    left: POSITION.x,
-    top: POSITION.y,
-    fontSize: POSITION.size,
-    opacity: POSITION.opacity,
-    transform: `rotate(${POSITION.rotate}deg)`,
-  }}
-  className="
-    absolute
-
-    font-black
-    uppercase
-
-    text-white
-
-    leading-none
-
-    z-15
-  "
->
-  {posicionAbreviada}
-</h2>
-
-      {/* ==========================================
-                    LUZ
-      ========================================== */}
-
-      <div
-        style={{
-          left: LIGHT.x,
-          bottom: LIGHT.y,
-          width: LIGHT.size,
-          height: LIGHT.size,
-          opacity: LIGHT.opacity,
-          transform: "translateX(-50%)",
-        }}
-        className="
-          absolute
-          rounded-full
-          bg-white
-          blur-[170px]
-          z-20
-        "
-      />
-
-      {/* ==========================================
-                    DORSAL
-      ========================================== */}
-
-      <h2
-        style={{
-          right: numberRight,
-          top: NUMBER.y,
-          fontSize: NUMBER.size,
-          opacity: NUMBER.opacity,
-          transform: `rotate(${NUMBER.rotate}deg)`,
-        }}
-        className="
-          absolute
-          font-black
-          leading-none
-          text-white
-          z-10
-          tracking-[-0.12em]
-        "
-      >
-        {numero}
-      </h2>
-
-      {/* ==========================================
-                    NOMBRE
-      ========================================== */}
-
-      <h1
-        style={{
-          left: NAME.x,
-          top: NAME.y,
-          fontSize: NAME.size,
-          opacity: NAME.opacity,
-          transform: `translateX(-50%) rotate(${NAME.rotate}deg)`,
-        }}
-        className="
-          absolute
-          font-black
-          uppercase
-          tracking-tight
-          text-white
-          z-30
-        "
-      >
-        {nombre}
-      </h1>
-
-      {/* ==========================================
-                    FOTO
-      ========================================== */}
-
-      <Image
-        src={foto}
-        alt={nombre}
-        width={PHOTO.width}
-        height={PHOTO.height}
-        style={{
-          left: PHOTO.x,
-          bottom: PHOTO.y,
-          height: PHOTO.height,
-          opacity: PHOTO.opacity,
-          transform: `rotate(${PHOTO.rotate}deg)`,
-        }}
-        className="
-          absolute
-          w-auto
-          object-contain
-          z-40
-        "
-      />
-            {/* ==========================================
-                  ESTADÍSTICAS
-      ========================================== */}
-
-      <div
-        style={{
-  left: stats.length === 2 ? STATS.xDouble : STATS.x,
-  bottom: stats.length === 2 ? STATS.yDouble : STATS.y,
-  opacity: STATS.opacity,
-}}
-        className="absolute z-40"
-      >
-        <PlayerStats
-  stats={[
     {
-      icon: <CalendarDays size={100} className="text-white" />,
+      icon: (
+        <CalendarDays
+          size={100}
+          className="text-white"
+        />
+      ),
       value: partidos,
     },
-
     {
-      icon: <PiSoccerBallFill size={100} className="text-white" />,
+      icon: (
+        <PiSoccerBallFill
+          size={100}
+          className="text-white"
+        />
+      ),
       value: goles,
     },
-
     {
-      icon: <SportShoe size={100} className="text-white" />,
+      icon: (
+        <SportShoe
+          size={100}
+          className="text-white"
+        />
+      ),
       value: asistencias,
     },
-
     {
       icon: (
         <Star
@@ -331,13 +157,122 @@ const posicionAbreviada = positionText[posicion];
       ),
       value: mvps,
     },
-  ].filter((stat) => stat.value > 0)}
-/>
+  ].filter((stat) => stat.value > 0);
+
+  return (
+    <div
+      className="relative h-[1350px] w-[1080px] overflow-hidden bg-black"
+      style={{
+        isolation: "isolate",
+      }}
+    >
+      {/* Fondo */}
+
+      <img
+        src="/templates/player-bg.png"
+        alt=""
+        crossOrigin="anonymous"
+        draggable={false}
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+      />
+
+      {/* Posición */}
+
+      <h2
+        style={{
+          left: POSITION.x,
+          top: POSITION.y,
+          fontSize: POSITION.size,
+          opacity: POSITION.opacity,
+          transform: `rotate(${POSITION.rotate}deg)`,
+        }}
+        className="absolute z-[15] font-black uppercase leading-none text-white"
+      >
+        {posicionAbreviada}
+      </h2>
+
+      {/* Luz */}
+
+      <div
+        style={{
+          left: LIGHT.x,
+          bottom: LIGHT.y,
+          width: LIGHT.size,
+          height: LIGHT.size,
+          opacity: LIGHT.opacity,
+          transform: "translateX(-50%)",
+        }}
+        className="absolute z-20 rounded-full bg-white blur-[170px]"
+      />
+
+      {/* Dorsal */}
+
+      <h2
+        style={{
+          right: numberRight,
+          top: NUMBER.y,
+          fontSize: NUMBER.size,
+          opacity: NUMBER.opacity,
+          transform: `rotate(${NUMBER.rotate}deg)`,
+        }}
+        className="absolute z-10 font-black leading-none tracking-[-0.12em] text-white"
+      >
+        {numero}
+      </h2>
+
+      {/* Nombre */}
+
+      <h1
+        style={{
+          left: NAME.x,
+          top: NAME.y,
+          fontSize: NAME.size,
+          opacity: NAME.opacity,
+          transform: `translateX(-50%) rotate(${NAME.rotate}deg)`,
+        }}
+        className="absolute z-30 whitespace-nowrap font-black uppercase tracking-tight text-white"
+      >
+        {nombre}
+      </h1>
+
+      {/* Foto del jugador */}
+
+      <img
+        src={foto}
+        alt={nombre}
+        crossOrigin="anonymous"
+        draggable={false}
+        style={{
+          left: PHOTO.x,
+          bottom: PHOTO.y,
+          width: PHOTO.width,
+          height: PHOTO.height,
+          opacity: PHOTO.opacity,
+          transform: `rotate(${PHOTO.rotate}deg)`,
+        }}
+        className="absolute z-40 object-contain"
+      />
+
+      {/* Estadísticas */}
+
+      <div
+        style={{
+          left:
+            stats.length === 2
+              ? STATS.xDouble
+              : STATS.x,
+          bottom:
+            stats.length === 2
+              ? STATS.yDouble
+              : STATS.y,
+          opacity: STATS.opacity,
+        }}
+        className="absolute z-50"
+      >
+        <PlayerStats stats={stats} />
       </div>
 
-      {/* ==========================================
-                    FOOTER
-      ========================================== */}
+      {/* Footer */}
 
       <p
         style={{
@@ -347,16 +282,10 @@ const posicionAbreviada = positionText[posicion];
           opacity: FOOTER.opacity,
           transform: "translateX(-50%)",
         }}
-        className="
-          absolute
-          tracking-[8px]
-          uppercase
-          text-white
-        "
+        className="absolute z-50 whitespace-nowrap uppercase tracking-[8px] text-white"
       >
         MARTINCITASFC.COM
       </p>
-
     </div>
   );
 }
