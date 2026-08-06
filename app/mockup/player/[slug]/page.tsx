@@ -30,6 +30,7 @@ export default async function Page({ params }: Props) {
       goles={player.goles}
       asistencias={player.asistencias}
       mvps={player.mvps ?? 0}
+      porteriasCero={player.porterias_cero ?? 0}
     />
   );
 }
