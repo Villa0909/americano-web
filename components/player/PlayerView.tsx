@@ -10,9 +10,6 @@ interface Props {
   children: React.ReactNode;
 }
 
-const CARD_WIDTH = 1080;
-const CARD_HEIGHT = 1350;
-
 export default function PlayerView({
   player,
   children,
@@ -23,10 +20,10 @@ export default function PlayerView({
   const [generating, setGenerating] = useState(false);
 
   function isMobileDevice() {
-    const userAgent = navigator.userAgent;
-
     const mobileUserAgent =
-      /Android|iPhone|iPad|iPod/i.test(userAgent);
+      /Android|iPhone|iPad|iPod/i.test(
+        navigator.userAgent,
+      );
 
     const touchIPad =
       navigator.platform === "MacIntel" &&
@@ -47,434 +44,77 @@ export default function PlayerView({
     );
   }
 
-  async function loadImage(url: string) {
-    const response = await fetch(url, {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `No se pudo cargar la imagen: ${url}`,
-      );
-    }
-
-    const blob = await response.blob();
-    const objectUrl = URL.createObjectURL(blob);
-
-    try {
-      const image = new Image();
-
-      image.src = objectUrl;
-
-      await new Promise<void>((resolve, reject) => {
-        image.onload = () => resolve();
-
-        image.onerror = () => {
-          reject(
-            new Error(
-              `No se pudo abrir la imagen: ${url}`,
-            ),
-          );
-        };
-      });
-
-      try {
-        await image.decode();
-      } catch {
-        // Safari a veces rechaza decode()
-        // aunque la imagen ya esté cargada.
-      }
-
-      return image;
-    } finally {
-      // No se revoca aquí porque todavía necesitamos
-      // usar la imagen dentro del canvas.
-    }
-  }
-
-  function drawCoverImage(
-    context: CanvasRenderingContext2D,
-    image: HTMLImageElement,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
+  async function waitForImages(
+    container: HTMLElement,
   ) {
-    const imageRatio =
-      image.naturalWidth / image.naturalHeight;
-
-    const areaRatio = width / height;
-
-    let sourceWidth = image.naturalWidth;
-    let sourceHeight = image.naturalHeight;
-    let sourceX = 0;
-    let sourceY = 0;
-
-    if (imageRatio > areaRatio) {
-      sourceWidth =
-        image.naturalHeight * areaRatio;
-
-      sourceX =
-        (image.naturalWidth - sourceWidth) / 2;
-    } else {
-      sourceHeight =
-        image.naturalWidth / areaRatio;
-
-      sourceY =
-        (image.naturalHeight - sourceHeight) / 2;
-    }
-
-    context.drawImage(
-      image,
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
-      x,
-      y,
-      width,
-      height,
-    );
-  }
-
-  function drawPlayerImage(
-    context: CanvasRenderingContext2D,
-    image: HTMLImageElement,
-  ) {
-    const desiredHeight = 1200;
-
-    const ratio =
-      image.naturalWidth / image.naturalHeight;
-
-    const desiredWidth = desiredHeight * ratio;
-
-    context.drawImage(
-      image,
-      -300,
-      CARD_HEIGHT - desiredHeight,
-      desiredWidth,
-      desiredHeight,
-    );
-  }
-
-  function drawStats(
-  context: CanvasRenderingContext2D,
-) {
-  const stats = [
-    {
-      label: "▣",
-      value: player.partidos ?? 0,
-      accent: "#ffffff",
-    },
-    {
-      label: "⚽",
-      value: player.goles ?? 0,
-      accent: "#ffffff",
-    },
-    {
-      label: "👟",
-      value: player.asistencias ?? 0,
-      accent: "#ffffff",
-    },
-    {
-      label: "★",
-      value: player.mvps ?? 0,
-      accent: "#facc15",
-    },
-  ].filter((stat) => stat.value > 0);
-
-  if (stats.length === 0) return;
-
-  const columns = stats.length <= 2 ? stats.length : 2;
-  const rows = Math.ceil(stats.length / columns);
-
-  const itemWidth = 170;
-  const itemHeight = 105;
-  const paddingX = 26;
-  const paddingY = 22;
-
-  const boxWidth =
-    columns * itemWidth + paddingX * 2;
-
-  const boxHeight =
-    rows * itemHeight + paddingY * 2;
-
-  const centerX = 760;
-
-  const bottom =
-    stats.length === 2 ? 180 : 130;
-
-  const x = centerX - boxWidth / 2;
-  const y =
-    CARD_HEIGHT - bottom - boxHeight;
-
-  // Fondo único
-  context.save();
-
-  context.shadowColor =
-    "rgba(0, 0, 0, 0.35)";
-  context.shadowBlur = 18;
-  context.shadowOffsetY = 8;
-
-  context.fillStyle =
-    "rgba(15, 15, 15, 0.72)";
-
-  context.beginPath();
-  context.roundRect(
-    x,
-    y,
-    boxWidth,
-    boxHeight,
-    26,
-  );
-  context.fill();
-
-  context.restore();
-
-  // Borde
-  context.strokeStyle =
-    "rgba(255, 255, 255, 0.20)";
-  context.lineWidth = 3;
-
-  context.beginPath();
-  context.roundRect(
-    x,
-    y,
-    boxWidth,
-    boxHeight,
-    26,
-  );
-  context.stroke();
-
-  // Datos
-  stats.forEach((stat, index) => {
-    const column = index % columns;
-    const row = Math.floor(index / columns);
-
-    const itemX =
-      x +
-      paddingX +
-      column * itemWidth;
-
-    const itemY =
-      y +
-      paddingY +
-      row * itemHeight;
-
-    const iconX = itemX + 48;
-    const valueX = itemX + 116;
-    const centerY = itemY + itemHeight / 2;
-
-    context.textBaseline = "middle";
-    context.textAlign = "center";
-
-    // Icono
-    context.fillStyle = stat.accent;
-    context.font =
-      stat.label === "★"
-        ? "900 72px Arial, sans-serif"
-        : "900 62px Arial, sans-serif";
-
-    context.fillText(
-      stat.label,
-      iconX,
-      centerY,
+    const images = Array.from(
+      container.querySelectorAll<HTMLImageElement>("img"),
     );
 
-    // Número
-    context.fillStyle = "#ffffff";
-    context.font =
-      "900 58px Arial, sans-serif";
-
-    context.fillText(
-      String(stat.value),
-      valueX,
-      centerY,
-    );
-  });
-}
-
-  async function generateMobileCardBlob() {
-    const canvas =
-      document.createElement("canvas");
-
-    canvas.width = CARD_WIDTH;
-    canvas.height = CARD_HEIGHT;
-
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      throw new Error(
-        "No se pudo crear el canvas.",
-      );
-    }
-
-    const [backgroundImage, playerImage] =
-      await Promise.all([
-        loadImage("/templates/player-bg.png"),
-        loadImage(player.foto),
-      ]);
-
-    // Fondo negro de respaldo
-    context.fillStyle = "#000000";
-
-    context.fillRect(
-      0,
-      0,
-      CARD_WIDTH,
-      CARD_HEIGHT,
-    );
-
-    // Fondo real
-    drawCoverImage(
-      context,
-      backgroundImage,
-      0,
-      0,
-      CARD_WIDTH,
-      CARD_HEIGHT,
-    );
-
-    const positionText = {
-      Portero: "POR",
-      Defensa: "DEF",
-      Mediocampista: "MED",
-      Delantero: "DEL",
-    } as const;
-
-    const abbreviatedPosition =
-      positionText[
-        player.posicion as keyof typeof positionText
-      ] ?? player.posicion;
-
-    // Posición
-    context.globalAlpha = 0.4;
-    context.fillStyle = "#ffffff";
-    context.textAlign = "left";
-    context.textBaseline = "top";
-    context.font =
-      "900 110px Arial, sans-serif";
-
-    context.fillText(
-      abbreviatedPosition,
-      50,
-      50,
-    );
-
-    // Número gigante
-    context.globalAlpha = 0.1;
-    context.fillStyle = "#ffffff";
-    context.textAlign = "right";
-    context.textBaseline = "top";
-    context.font =
-      "900 520px Arial, sans-serif";
-
-    const numberRight =
-      player.numero < 10 ? 320 : 260;
-
-    context.fillText(
-      String(player.numero),
-      CARD_WIDTH - numberRight,
-      400,
-    );
-
-    // Nombre
-    context.globalAlpha = 1;
-    context.fillStyle = "#ffffff";
-    context.textAlign = "center";
-    context.textBaseline = "top";
-    context.font =
-      "900 170px Arial, sans-serif";
-
-    context.fillText(
-      String(player.nombre).toUpperCase(),
-      670,
-      180,
-    );
-
-    // Foto
-    drawPlayerImage(
-      context,
-      playerImage,
-    );
-
-    // Estadísticas
-    drawStats(context);
-
-    // Footer
-    context.globalAlpha = 0.7;
-    context.fillStyle = "#ffffff";
-    context.textAlign = "center";
-    context.textBaseline = "alphabetic";
-    context.font =
-      "500 28px Arial, sans-serif";
-
-    context.fillText(
-      "M A R T I N C I T A S F C . C O M",
-      740,
-      CARD_HEIGHT - 45,
-    );
-
-    context.globalAlpha = 1;
-
-    return new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(
-              new Error(
-                "No se pudo crear el PNG.",
-              ),
+    await Promise.all(
+      images.map(async (image) => {
+        if (!image.complete) {
+          await new Promise<void>((resolve) => {
+            image.addEventListener(
+              "load",
+              () => resolve(),
+              { once: true },
             );
 
-            return;
-          }
+            image.addEventListener(
+              "error",
+              () => resolve(),
+              { once: true },
+            );
+          });
+        }
 
-          resolve(blob);
-        },
-        "image/png",
-        1,
-      );
-    });
+        try {
+          await image.decode();
+        } catch {
+          // Safari puede rechazar decode aunque ya haya cargado.
+        }
+      }),
+    );
   }
 
-  async function downloadDesktopCard() {
+  async function generateCardDataUrl() {
     if (!cardRef.current) {
-      return;
+      throw new Error(
+        "No se encontró la tarjeta.",
+      );
     }
 
-    const { toPng } = await import(
-      "html-to-image"
+    const { domToPng } = await import(
+      "modern-screenshot"
     );
 
     await document.fonts.ready;
+    await waitForImages(cardRef.current);
 
-    const dataUrl = await toPng(
-      cardRef.current,
-      {
-        pixelRatio: 3,
-        cacheBust: true,
-        backgroundColor: "transparent",
-      },
-    );
+    // Dejamos que Safari pinte completamente
+    // las imágenes y las fuentes.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
 
-    const link =
-      document.createElement("a");
-
-    link.download = `${safeFileName(
-      player.nombre,
-    )}.png`;
-
-    link.href = dataUrl;
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    return domToPng(cardRef.current, {
+      width: 1080,
+      height: 1350,
+      scale: 1,
+      backgroundColor: "transparent",
+    });
   }
 
-  async function shareMobileCard() {
-    const blob =
-      await generateMobileCardBlob();
+  async function shareMobileCard(
+    dataUrl: string,
+  ) {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
 
     const file = new File(
       [blob],
@@ -498,25 +138,45 @@ export default function PlayerView({
       return;
     }
 
-    // Respaldo para navegadores sin Web Share
-    const imageUrl =
-      URL.createObjectURL(blob);
+    // Respaldo: abre la imagen generada.
+    const imageUrl = URL.createObjectURL(blob);
 
     window.location.href = imageUrl;
+
+    window.setTimeout(() => {
+      URL.revokeObjectURL(imageUrl);
+    }, 120000);
+  }
+
+  function downloadDesktopCard(
+    dataUrl: string,
+  ) {
+    const link =
+      document.createElement("a");
+
+    link.href = dataUrl;
+    link.download = `${safeFileName(
+      player.nombre,
+    )}.png`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 
   async function downloadCard() {
-    if (generating) {
-      return;
-    }
+    if (generating) return;
 
     try {
       setGenerating(true);
 
+      const dataUrl =
+        await generateCardDataUrl();
+
       if (isMobileDevice()) {
-        await shareMobileCard();
+        await shareMobileCard(dataUrl);
       } else {
-        await downloadDesktopCard();
+        downloadDesktopCard(dataUrl);
       }
     } catch (error) {
       if (
@@ -542,8 +202,6 @@ export default function PlayerView({
   return (
     <>
       {children}
-
-      {/* Botón compartir */}
 
       <button
         type="button"
@@ -580,18 +238,16 @@ export default function PlayerView({
         }}
       />
 
-      {/* Solo se usa para descargar en PC */}
+      {/*
+        La tarjeta usa exactamente PlayerCard y PlayerStats.
+
+        No usamos opacity: 0 porque Safari puede omitir
+        elementos invisibles durante la captura.
+      */}
 
       <div
         aria-hidden="true"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          opacity: 0,
-          pointerEvents: "none",
-          zIndex: -9999,
-        }}
+        className="pointer-events-none fixed left-[-2000px] top-0 -z-10"
       >
         <div ref={cardRef}>
           <PlayerCard
