@@ -6,6 +6,7 @@ import { PiSoccerBallFill } from "react-icons/pi";
 
 import {
   CalendarDays,
+  ShieldCheck,
   SportShoe,
   Star,
 } from "lucide-react";
@@ -25,6 +26,7 @@ interface Props {
   goles: number;
   asistencias: number;
   mvps: number;
+  porteriasCero: number;
 }
 
 /* FOTO */
@@ -105,6 +107,7 @@ export default function PlayerCard({
   goles,
   asistencias,
   mvps,
+  porteriasCero,
 }: Props) {
   const numberRight =
     numero < 10 ? 320 : NUMBER.x;
@@ -127,8 +130,9 @@ export default function PlayerCard({
           className="text-white"
         />
       ),
-      value: partidos,
+      value: Number(partidos ?? 0),
     },
+
     {
       icon: (
         <PiSoccerBallFill
@@ -136,8 +140,9 @@ export default function PlayerCard({
           className="text-white"
         />
       ),
-      value: goles,
+      value: Number(goles ?? 0),
     },
+
     {
       icon: (
         <SportShoe
@@ -145,8 +150,9 @@ export default function PlayerCard({
           className="text-white"
         />
       ),
-      value: asistencias,
+      value: Number(asistencias ?? 0),
     },
+
     {
       icon: (
         <Star
@@ -155,8 +161,24 @@ export default function PlayerCard({
           fill="currentColor"
         />
       ),
-      value: mvps,
+      value: Number(mvps ?? 0),
     },
+
+    ...(posicion === "Portero"
+      ? [
+          {
+            icon: (
+              <ShieldCheck
+                size={100}
+                className="text-white"
+              />
+            ),
+            value: Number(
+              porteriasCero ?? 0,
+            ),
+          },
+        ]
+      : []),
   ].filter((stat) => stat.value > 0);
 
   return (
@@ -166,7 +188,7 @@ export default function PlayerCard({
         isolation: "isolate",
       }}
     >
-      {/* Fondo */}
+      {/* FONDO */}
 
       <img
         src="/templates/player-bg.png"
@@ -176,7 +198,7 @@ export default function PlayerCard({
         className="absolute inset-0 z-0 h-full w-full object-cover"
       />
 
-      {/* Posición */}
+      {/* POSICIÓN */}
 
       <h2
         style={{
@@ -191,7 +213,7 @@ export default function PlayerCard({
         {posicionAbreviada}
       </h2>
 
-      {/* Luz */}
+      {/* LUZ */}
 
       <div
         style={{
@@ -205,7 +227,7 @@ export default function PlayerCard({
         className="absolute z-20 rounded-full bg-white blur-[170px]"
       />
 
-      {/* Dorsal */}
+      {/* DORSAL */}
 
       <h2
         style={{
@@ -220,7 +242,7 @@ export default function PlayerCard({
         {numero}
       </h2>
 
-      {/* Nombre */}
+      {/* NOMBRE */}
 
       <h1
         style={{
@@ -235,7 +257,7 @@ export default function PlayerCard({
         {nombre}
       </h1>
 
-      {/* Foto del jugador */}
+      {/* FOTO DEL JUGADOR */}
 
       <img
         src={foto}
@@ -253,26 +275,30 @@ export default function PlayerCard({
         className="absolute z-40 object-contain"
       />
 
-      {/* Estadísticas */}
+      {/* ESTADÍSTICAS */}
 
-      <div
-        style={{
-          left:
-            stats.length === 2
-              ? STATS.xDouble
-              : STATS.x,
-          bottom:
-            stats.length === 2
-              ? STATS.yDouble
-              : STATS.y,
-          opacity: STATS.opacity,
-        }}
-        className="absolute z-50"
-      >
-        <PlayerStats stats={stats} />
-      </div>
+      {stats.length > 0 && (
+        <div
+          style={{
+            left:
+              stats.length === 2
+                ? STATS.xDouble
+                : STATS.x,
 
-      {/* Footer */}
+            bottom:
+              stats.length === 2
+                ? STATS.yDouble
+                : STATS.y,
+
+            opacity: STATS.opacity,
+          }}
+          className="absolute z-50"
+        >
+          <PlayerStats stats={stats} />
+        </div>
+      )}
+
+      {/* FOOTER */}
 
       <p
         style={{

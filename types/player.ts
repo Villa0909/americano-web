@@ -2,11 +2,9 @@ export interface Player {
   id: string;
 
   nombre: string;
-
   slug: string;
-
   numero: number;
-mvps: number;
+
   posicion:
     | "Portero"
     | "Defensa"
@@ -16,18 +14,23 @@ mvps: number;
   foto: string;
 
   goles: number;
-
   asistencias: number;
-
   partidos: number;
+  mvps: number;
+
+  /*
+   * Solo se utiliza para porteros.
+   * Los demás jugadores tendrán 0.
+   */
+  porterias_cero: number;
 
   edad: number;
-
   altura: number;
-
   peso: number;
 
-  pie: "Derecho" | "Izquierdo";
+  pie:
+    | "Derecho"
+    | "Izquierdo";
 
   descripcion: string;
 }

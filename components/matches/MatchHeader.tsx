@@ -1,13 +1,17 @@
 import Image from "next/image";
+import { MapPin } from "lucide-react";
 import { PiSoccerBallFill } from "react-icons/pi";
 
 interface Props {
   rival: string;
   escudoRival: string;
   torneo: string;
+  jornada: number;
   fecha: string;
-  golesFavor: number;
-  golesContra: number;
+  golesFavor: number | null;
+  golesContra: number | null;
+  ubicacion: string | null;
+  ubicacionUrl: string | null;
 
   goleadores: {
     player_id: string;
@@ -20,53 +24,67 @@ export default function MatchHeader({
   rival,
   escudoRival,
   torneo,
+  jornada,
   fecha,
   golesFavor,
   golesContra,
   goleadores,
+  ubicacion,
+  ubicacionUrl,
 }: Props) {
-  let status = "Empate";
-  let color = "bg-zinc-500";
+  const played =
+    golesFavor !== null &&
+    golesContra !== null;
 
-  if (golesFavor > golesContra) {
-    status = "Victoria";
-    color = "bg-green-600";
-  }
+  let status = "Próximo partido";
+  let color = "bg-zinc-700";
 
-  if (golesFavor < golesContra) {
-    status = "Derrota";
-    color = "bg-red-600";
+  if (played) {
+    if (golesFavor > golesContra) {
+      status = "Victoria";
+      color = "bg-green-600";
+    } else if (golesFavor < golesContra) {
+      status = "Derrota";
+      color = "bg-red-600";
+    } else {
+      status = "Empate";
+      color = "bg-zinc-500";
+    }
   }
 
   const rivalShield = escudoRival
     ? `/escudos/${escudoRival}`
     : "/logo.png";
 
-  const formattedDate = new Date(fecha).toLocaleDateString(
-    "es-MX",
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    },
-  );
+  const formattedDate = new Date(
+    fecha,
+  ).toLocaleDateString("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const matchTime = new Date(
+    fecha,
+  ).toLocaleTimeString("es-MX", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
   return (
     <section className="overflow-hidden rounded-2xl bg-white shadow-md sm:rounded-3xl">
       <div className="bg-gradient-to-r from-black via-zinc-900 to-black text-white">
-        {/* DISEÑO PARA TELÉFONO */}
+        {/* TELÉFONO */}
 
         <div className="px-4 py-7 md:hidden">
           <p className="text-center text-xs font-semibold uppercase tracking-[3px] text-zinc-400">
-            {torneo}
+            Jornada {jornada} · {torneo}
           </p>
 
           {/* Equipos */}
 
           <div className="mt-7 grid grid-cols-2 gap-5">
-            {/* Martincitas */}
-
             <div className="flex min-w-0 flex-col items-center text-center">
               <div className="relative h-20 w-20">
                 <Image
@@ -83,8 +101,6 @@ export default function MatchHeader({
                 MARTINCITAS
               </h2>
             </div>
-
-            {/* Rival */}
 
             <div className="flex min-w-0 flex-col items-center text-center">
               <div className="relative h-20 w-20">
@@ -106,15 +122,42 @@ export default function MatchHeader({
           {/* Marcador */}
 
           <div className="mt-7 flex flex-col items-center">
-            <h1 className="text-5xl font-black tracking-tight">
-              {golesFavor} - {golesContra}
+            <h1
+              className={
+                played
+                  ? "text-7xl font-black"
+                  : "text-4xl font-black"
+              }
+            >
+              {played
+                ? `${golesFavor} - ${golesContra}`
+                : matchTime}
             </h1>
 
             <span
-              className={`mt-4 rounded-full px-5 py-2 text-sm font-bold text-white ${color}`}
+              className={`mt-5 rounded-full px-5 py-2 text-sm font-bold text-white ${color}`}
             >
               {status}
             </span>
+
+            {!played && ubicacionUrl && (
+              <a
+                href={ubicacionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20"
+              >
+                <MapPin
+                  size={18}
+                  className="shrink-0"
+                />
+
+                <span className="truncate">
+                  {ubicacion ||
+                    "Ver ubicación"}
+                </span>
+              </a>
+            )}
           </div>
 
           {/* Goleadores */}
@@ -126,38 +169,47 @@ export default function MatchHeader({
               </p>
 
               <div className="flex flex-col items-center gap-2">
-                {goleadores.map((player) => (
-                  <div
-                    key={player.player_id}
-                    className="flex items-center justify-center gap-2 text-sm font-semibold"
-                  >
-                    <span>{player.nombre}</span>
+                {goleadores.map(
+                  (player) => (
+                    <div
+                      key={
+                        player.player_id
+                      }
+                      className="flex items-center justify-center gap-2 text-sm font-semibold"
+                    >
+                      <span>
+                        {player.nombre}
+                      </span>
 
-                    <div className="flex items-center gap-1">
-                      {Array.from({
-                        length: player.goles,
-                      }).map((_, index) => (
-                        <PiSoccerBallFill
-                          key={index}
-                          className="text-lg"
-                        />
-                      ))}
+                      <div className="flex items-center gap-1">
+                        {Array.from({
+                          length:
+                            player.goles,
+                        }).map(
+                          (_, index) => (
+                            <PiSoccerBallFill
+                              key={index}
+                              className="text-lg"
+                            />
+                          ),
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* DISEÑO ORIGINAL PARA PC */}
+        {/* PC */}
 
         <div className="hidden px-10 py-12 md:block">
           <p className="text-center text-sm uppercase tracking-[4px] text-zinc-400">
-            {torneo}
+            Jornada {jornada} · {torneo}
           </p>
 
-          <div className="mt-10 grid grid-cols-[1fr_auto_1fr] items-start">
+          <div className="mt-10 grid grid-cols-[1fr_auto_1fr] items-start gap-8">
             {/* Martincitas */}
 
             <div className="flex flex-col items-center">
@@ -178,34 +230,51 @@ export default function MatchHeader({
 
               {goleadores.length > 0 && (
                 <div className="mt-6 flex flex-col gap-2">
-                  {goleadores.map((player) => (
-                    <div
-                      key={player.player_id}
-                      className="flex items-center justify-center gap-2 text-base font-semibold"
-                    >
-                      <span>{player.nombre}</span>
+                  {goleadores.map(
+                    (player) => (
+                      <div
+                        key={
+                          player.player_id
+                        }
+                        className="flex items-center justify-center gap-2 text-base font-semibold"
+                      >
+                        <span>
+                          {player.nombre}
+                        </span>
 
-                      <div className="flex items-center gap-1">
-                        {Array.from({
-                          length: player.goles,
-                        }).map((_, index) => (
-                          <PiSoccerBallFill
-                            key={index}
-                            className="text-xl"
-                          />
-                        ))}
+                        <div className="flex items-center gap-1">
+                          {Array.from({
+                            length:
+                              player.goles,
+                          }).map(
+                            (_, index) => (
+                              <PiSoccerBallFill
+                                key={index}
+                                className="text-xl"
+                              />
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Marcador */}
+            {/* Centro */}
 
-            <div className="mx-10 flex flex-col items-center">
-              <h1 className="whitespace-nowrap text-7xl font-black">
-                {golesFavor} - {golesContra}
+            <div className="mx-6 flex min-w-[260px] flex-col items-center">
+              <h1
+                className={`whitespace-nowrap font-black ${
+                  played
+                    ? "text-7xl"
+                    : "text-4xl"
+                }`}
+              >
+                {played
+                  ? `${golesFavor} - ${golesContra}`
+                  : matchTime}
               </h1>
 
               <span
@@ -213,6 +282,26 @@ export default function MatchHeader({
               >
                 {status}
               </span>
+
+              {!played &&
+                ubicacionUrl && (
+                  <a
+                    href={ubicacionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex max-w-[320px] items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20"
+                  >
+                    <MapPin
+                      size={18}
+                      className="shrink-0"
+                    />
+
+                    <span className="truncate">
+                      {ubicacion ||
+                        "Ver ubicación"}
+                    </span>
+                  </a>
+                )}
             </div>
 
             {/* Rival */}

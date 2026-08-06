@@ -11,7 +11,14 @@ interface Props {
   }>;
 }
 
-export default async function PlayerPage({ params }: Props) {
+interface PlayerStat {
+  title: string;
+  value: number;
+}
+
+export default async function PlayerPage({
+  params,
+}: Props) {
   const { slug } = await params;
 
   let player;
@@ -25,6 +32,47 @@ export default async function PlayerPage({ params }: Props) {
   if (!player) {
     notFound();
   }
+
+  const playerStats: PlayerStat[] = [
+    {
+      title: "GOLES",
+      value: Number(player.goles ?? 0),
+    },
+    {
+      title: "ASISTENCIAS",
+      value: Number(player.asistencias ?? 0),
+    },
+    {
+      title: "PARTIDOS",
+      value: Number(player.partidos ?? 0),
+    },
+    {
+      title: "MVP",
+      value: Number(player.mvps ?? 0),
+    },
+  ];
+
+  if (player.posicion === "Portero") {
+    playerStats.push({
+      title: "PORTERÍAS A 0",
+      value: Number(
+        player.porterias_cero ?? 0,
+      ),
+    });
+  }
+
+  const visibleStats = playerStats.filter(
+    (stat) => stat.value > 0,
+  );
+
+  const statsColumns =
+    visibleStats.length === 1
+      ? "grid-cols-1 max-w-[220px]"
+      : visibleStats.length === 2
+        ? "grid-cols-2"
+        : visibleStats.length === 3
+          ? "grid-cols-3"
+          : "grid-cols-2 sm:grid-cols-4";
 
   return (
     <PlayerView player={player}>
@@ -40,18 +88,19 @@ export default async function PlayerPage({ params }: Props) {
           <div className="mt-6 grid gap-7 sm:mt-8 sm:gap-9 lg:grid-cols-[380px_1fr] lg:gap-10">
             {/* FOTO */}
 
-<div className="mx-auto w-full max-w-[430px] overflow-hidden rounded-2xl bg-zinc-100 shadow-lg lg:mx-0">
-  <div className="relative h-[460px] w-full sm:h-[520px] lg:h-[550px]">
-    <Image
-      src={player.foto}
-      alt={player.nombre}
-      fill
-      priority
-      sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1024px) 430px, 380px"
-      className="object-cover"
-    />
-  </div>
-</div>
+            <div className="mx-auto w-full max-w-[430px] overflow-hidden rounded-2xl bg-zinc-100 shadow-lg lg:mx-0">
+              <div className="relative h-[460px] w-full sm:h-[520px] lg:h-[550px]">
+                <Image
+                  src={player.foto}
+                  alt={player.nombre}
+                  fill
+                  priority
+                  sizes="(max-width: 640px) calc(100vw - 32px), (max-width: 1024px) 430px, 380px"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+
             {/* INFORMACIÓN */}
 
             <div className="min-w-0">
@@ -71,32 +120,57 @@ export default async function PlayerPage({ params }: Props) {
 
               {/* ESTADÍSTICAS */}
 
-              <div className="mt-8 grid grid-cols-3 gap-2 sm:mt-10 sm:gap-4 lg:gap-6">
-                <Stat title="GOLES" value={player.goles} />
-                <Stat title="ASISTENCIAS" value={player.asistencias} />
-                <Stat title="PARTIDOS" value={player.partidos} />
-              </div>
+              {visibleStats.length > 0 && (
+                <div
+                  className={`mt-8 grid gap-2 sm:mt-10 sm:gap-4 lg:gap-6 ${statsColumns}`}
+                >
+                  {visibleStats.map((stat) => (
+                    <Stat
+                      key={stat.title}
+                      title={stat.title}
+                      value={stat.value}
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* DATOS */}
 
               <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-7 border-y border-zinc-200 py-8 sm:mt-12 sm:gap-x-8 sm:gap-y-8">
-                <Info title="Edad" value={`${player.edad} años`} />
-                <Info title="Altura" value={`${player.altura} cm`} />
-                <Info title="Peso" value={`${player.peso} kg`} />
-                <Info title="Pie hábil" value={player.pie} />
+                <Info
+                  title="Edad"
+                  value={`${player.edad} años`}
+                />
+
+                <Info
+                  title="Altura"
+                  value={`${player.altura} cm`}
+                />
+
+                <Info
+                  title="Peso"
+                  value={`${player.peso} kg`}
+                />
+
+                <Info
+                  title="Pie hábil"
+                  value={player.pie}
+                />
               </div>
 
-              {/* BIOGRAFÍA */}
+              {/* LEMA */}
 
-              <div className="mt-9 sm:mt-12">
-                <h2 className="mb-3 text-xl font-black sm:text-2xl">
-                  Biografía
-                </h2>
+              {player.descripcion?.trim() && (
+                <div className="mt-9 sm:mt-12">
+                  <h2 className="mb-3 text-xl font-black uppercase tracking-wide sm:text-2xl">
+                    Mi lema
+                  </h2>
 
-                <p className="text-base leading-7 text-zinc-700 sm:leading-8">
-                  {player.descripcion || "Biografía no disponible."}
-                </p>
-              </div>
+                  <p className="text-base italic leading-7 text-zinc-700 sm:leading-8">
+                    “{player.descripcion}”
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -113,8 +187,8 @@ function Stat({
   value: number;
 }) {
   return (
-    <div className="min-w-0 rounded-xl border border-zinc-200 bg-white px-1 py-4 text-center shadow-sm sm:p-5 lg:p-6">
-      <p className="truncate text-[9px] font-bold tracking-[1px] text-zinc-600 sm:text-xs sm:tracking-[2px] lg:text-sm lg:tracking-[3px]">
+    <div className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-4 text-center shadow-sm sm:p-5 lg:p-6">
+      <p className="text-[9px] font-bold leading-tight tracking-[1px] text-zinc-600 sm:text-xs sm:tracking-[2px] lg:text-sm">
         {title}
       </p>
 

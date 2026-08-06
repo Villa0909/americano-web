@@ -11,6 +11,8 @@ export interface Match {
   resultado: string | null;
   escudo_rival: string | null;
   created_at: string;
+  ubicacion: string | null;
+ubicacion_url: string | null;
 }
 
 export async function getMatches() {
@@ -30,11 +32,11 @@ export async function createMatch(match: {
   rival: string;
   fecha: string;
   torneo: string;
-  goles_favor: number;
-  goles_contra: number;
+  goles_favor: number | null;
+  goles_contra: number | null;
   local: boolean;
-  resultado: string;
-  escudo_rival: string;
+  resultado: string | null;
+  escudo_rival: string | null;
 }) {
   const { data, error } = await supabase
     .from("matches")
@@ -49,7 +51,18 @@ export async function createMatch(match: {
 
 export async function updateMatch(
   id: number,
-  match: Partial<Match>
+  match: {
+    rival?: string;
+    fecha?: string;
+    torneo?: string | null;
+    goles_favor?: number | null;
+    goles_contra?: number | null;
+    local?: boolean;
+    resultado?: string | null;
+    escudo_rival?: string | null;
+    ubicacion?: string | null;
+ubicacion_url?: string | null;
+  }
 ) {
   const { data, error } = await supabase
     .from("matches")

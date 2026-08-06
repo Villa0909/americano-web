@@ -98,9 +98,16 @@ export default function MatchCard({
             <div
               className={`flex min-h-12 min-w-[84px] items-center justify-center rounded-xl px-3 text-center text-lg font-black ${resultColor}`}
             >
-              {played
-                ? `${match.goles_favor} - ${match.goles_contra}`
-                : "Por jugar"}
+              {played ? (
+  <>
+    {match.goles_favor} - {match.goles_contra}
+  </>
+) : (
+  new Date(match.fecha).toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+)}
             </div>
 
             {/* Rival */}
@@ -153,9 +160,16 @@ export default function MatchCard({
             <div
               className={`mx-8 flex h-12 min-w-[92px] items-center justify-center rounded-xl px-3 text-xl font-black ${resultColor}`}
             >
-              {played
-                ? `${match.goles_favor} - ${match.goles_contra}`
-                : "Por jugar"}
+              {played ? (
+  <>
+    {match.goles_favor} - {match.goles_contra}
+  </>
+) : (
+  new Date(match.fecha).toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+)}
             </div>
 
             {/* Rival */}

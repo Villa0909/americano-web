@@ -251,15 +251,18 @@ export default function PlayerView({
       >
         <div ref={cardRef}>
           <PlayerCard
-            nombre={player.nombre}
-            numero={player.numero}
-            foto={player.foto}
-            posicion={player.posicion}
-            partidos={player.partidos}
-            goles={player.goles}
-            asistencias={player.asistencias}
-            mvps={player.mvps ?? 0}
-          />
+  nombre={player.nombre}
+  numero={player.numero}
+  foto={player.foto}
+  posicion={player.posicion}
+  partidos={player.partidos}
+  goles={player.goles}
+  asistencias={player.asistencias}
+  mvps={player.mvps ?? 0}
+  porteriasCero={
+    player.porterias_cero ?? 0
+  }
+/>
         </div>
       </div>
     </>

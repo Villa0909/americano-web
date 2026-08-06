@@ -56,6 +56,9 @@ export default async function MatchPage({
   golesFavor={match.goles_favor}
   golesContra={match.goles_contra}
   goleadores={goles}
+  ubicacion={match.ubicacion}
+  ubicacionUrl={match.ubicacion_url}
+  jornada={match.id}
 />
 
 
