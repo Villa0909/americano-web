@@ -163,7 +163,7 @@ export default async function PlayerPage({
               {player.descripcion?.trim() && (
                 <div className="mt-9 sm:mt-12">
                   <h2 className="mb-3 text-xl font-black uppercase tracking-wide sm:text-2xl">
-                    Mi lema
+                    Frase Personal
                   </h2>
 
                   <p className="text-base italic leading-7 text-zinc-700 sm:leading-8">

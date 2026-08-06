@@ -1,10 +1,11 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import MatchTabs from "@/components/matches/MatchTabs";
+
 import MatchHeader from "@/components/matches/MatchHeader";
+import MatchTabs from "@/components/matches/MatchTabs";
+import MatchView from "@/components/matches/MatchView";
+
 import { getMatch } from "@/lib/matches";
 import { getMatchDetails } from "@/lib/playerMatchStats";
-
 
 interface Props {
   params: Promise<{
@@ -23,53 +24,67 @@ export default async function MatchPage({
     notFound();
   }
 
-  const stats = await getMatchDetails(match.id);
+  const stats =
+    await getMatchDetails(match.id);
 
   const goles = stats.filter(
-    (s) => s.goles > 0
+    (stat) => stat.goles > 0,
   );
 
   const asistencias = stats.filter(
-    (s) => s.asistencias > 0
+    (stat) => stat.asistencias > 0,
   );
 
   const amarillas = stats.filter(
-    (s) => s.amarillas > 0
+    (stat) => stat.amarillas > 0,
   );
 
   const rojas = stats.filter(
-    (s) => s.rojas > 0
+    (stat) => stat.rojas > 0,
   );
 
-  const mvp = stats.find(
-    (s) => s.mvp
-  );
+  const mvp =
+    stats.find((stat) => stat.mvp) ?? null;
 
   return (
-    <main className="mx-auto max-w-5xl px-8 py-12">
+    <MatchView
+      match={match}
+      goles={goles}
+      asistencias={asistencias}
+      mvp={mvp}
+    >
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <MatchHeader
+          rival={match.rival}
+          escudoRival={
+            match.escudo_rival ?? ""
+          }
+          torneo={match.torneo ?? ""}
+          fecha={match.fecha}
+          golesFavor={
+            match.goles_favor
+          }
+          golesContra={
+            match.goles_contra
+          }
+          goleadores={goles}
+          ubicacion={
+            match.ubicacion
+          }
+          ubicacionUrl={
+            match.ubicacion_url
+          }
+          jornada={match.id}
+        />
 
-      <MatchHeader
-  rival={match.rival}
-  escudoRival={match.escudo_rival ?? ""}
-  torneo={match.torneo ?? ""}
-  fecha={match.fecha}
-  golesFavor={match.goles_favor}
-  golesContra={match.goles_contra}
-  goleadores={goles}
-  ubicacion={match.ubicacion}
-  ubicacionUrl={match.ubicacion_url}
-  jornada={match.id}
-/>
-
-
-
-
-<MatchTabs
-  goles={goles}
-  asistencias={asistencias}
-  amarillas={amarillas}
-  rojas={rojas}
-  mvp={mvp}
-/>    </main>
+        <MatchTabs
+          goles={goles}
+          asistencias={asistencias}
+          amarillas={amarillas}
+          rojas={rojas}
+          mvp={mvp}
+        />
+      </main>
+    </MatchView>
   );
 }
