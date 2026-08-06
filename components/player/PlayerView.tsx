@@ -73,17 +73,111 @@ export default function PlayerView({
     );
   }
 
+async function imageUrlToDataUrl(url: string) {
+  const response = await fetch(url, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar la imagen: ${url}`);
+  }
+
+  const blob = await response.blob();
+
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("No se pudo convertir la imagen."));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error("No se pudo leer la imagen."));
+    };
+
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function embedCardImages(container: HTMLElement) {
+  const images = Array.from(
+    container.querySelectorAll<HTMLImageElement>("img"),
+  );
+
+  const originalSources = images.map((image) => ({
+    image,
+    src: image.src,
+    srcset: image.srcset,
+  }));
+
+  await Promise.all(
+    images.map(async (image) => {
+      const source =
+        image.currentSrc ||
+        image.src;
+
+      const dataUrl =
+        await imageUrlToDataUrl(source);
+
+      image.removeAttribute("srcset");
+      image.src = dataUrl;
+
+      if (!image.complete) {
+        await new Promise<void>((resolve) => {
+          image.onload = () => resolve();
+          image.onerror = () => resolve();
+        });
+      }
+
+      try {
+        await image.decode();
+      } catch {
+        // Safari puede rechazar decode aunque ya haya cargado.
+      }
+    }),
+  );
+
+  return () => {
+    originalSources.forEach(
+      ({ image, src, srcset }) => {
+        image.src = src;
+
+        if (srcset) {
+          image.srcset = srcset;
+        }
+      },
+    );
+  };
+}
+
   async function downloadCard() {
   if (!cardRef.current) return;
+
+  let restoreImages: (() => void) | undefined;
 
   try {
     const { toPng } = await import("html-to-image");
 
     await document.fonts.ready;
 
+    restoreImages =
+      await embedCardImages(cardRef.current);
+
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+
     const dataUrl = await toPng(cardRef.current, {
       pixelRatio: 3,
-      cacheBust: true,
+      cacheBust: false,
       backgroundColor: "transparent",
     });
 
@@ -101,13 +195,17 @@ export default function PlayerView({
         navigator.userAgent,
       );
 
-    // TELÉFONO: menú nativo para compartir
     if (isMobile) {
       const response = await fetch(dataUrl);
       const blob = await response.blob();
 
-      const file = new File(
+      const pngBlob = new Blob(
         [blob],
+        { type: "image/png" },
+      );
+
+      const file = new File(
+        [pngBlob],
         `${safeName}.png`,
         {
           type: "image/png",
@@ -128,15 +226,15 @@ export default function PlayerView({
         return;
       }
 
-      alert(
-        "Este navegador no permite compartir la imagen directamente.",
-      );
+      const previewUrl =
+        URL.createObjectURL(pngBlob);
 
+      window.location.href = previewUrl;
       return;
     }
 
-    // PC: descarga directa
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
 
     link.download = `${safeName}.png`;
     link.href = dataUrl;
@@ -157,7 +255,11 @@ export default function PlayerView({
       error,
     );
 
-    alert("No se pudo generar la tarjeta.");
+    alert(
+      "No se pudo generar la tarjeta completa.",
+    );
+  } finally {
+    restoreImages?.();
   }
 }
 
