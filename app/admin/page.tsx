@@ -115,6 +115,7 @@ export default function AdminPage() {
     | "Derecho"
     | "Izquierdo",
   descripcion: form.descripcion,
+  mvps:0,
 };
 
       if (selectedId) {
