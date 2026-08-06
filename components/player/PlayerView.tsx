@@ -158,76 +158,141 @@ export default function PlayerView({
   }
 
   function drawStats(
-    context: CanvasRenderingContext2D,
-  ) {
-    const stats = [
-      {
-        label: "PJ",
-        value: player.partidos ?? 0,
-      },
-      {
-        label: "⚽",
-        value: player.goles ?? 0,
-      },
-      {
-        label: "A",
-        value: player.asistencias ?? 0,
-      },
-      {
-        label: "★",
-        value: player.mvps ?? 0,
-      },
-    ].filter((stat) => stat.value > 0);
+  context: CanvasRenderingContext2D,
+) {
+  const stats = [
+    {
+      label: "▣",
+      value: player.partidos ?? 0,
+      accent: "#ffffff",
+    },
+    {
+      label: "⚽",
+      value: player.goles ?? 0,
+      accent: "#ffffff",
+    },
+    {
+      label: "👟",
+      value: player.asistencias ?? 0,
+      accent: "#ffffff",
+    },
+    {
+      label: "★",
+      value: player.mvps ?? 0,
+      accent: "#facc15",
+    },
+  ].filter((stat) => stat.value > 0);
 
-    if (stats.length === 0) {
-      return;
-    }
+  if (stats.length === 0) return;
 
-    const startX =
-      stats.length === 2 ? 520 : 550;
+  const columns = stats.length <= 2 ? stats.length : 2;
+  const rows = Math.ceil(stats.length / columns);
 
-    const bottom =
-      stats.length === 2 ? 180 : 130;
+  const itemWidth = 170;
+  const itemHeight = 105;
+  const paddingX = 26;
+  const paddingY = 22;
 
-    const y = CARD_HEIGHT - bottom;
-    const gap = 125;
+  const boxWidth =
+    columns * itemWidth + paddingX * 2;
 
-    context.textAlign = "center";
+  const boxHeight =
+    rows * itemHeight + paddingY * 2;
+
+  const centerX = 760;
+
+  const bottom =
+    stats.length === 2 ? 180 : 130;
+
+  const x = centerX - boxWidth / 2;
+  const y =
+    CARD_HEIGHT - bottom - boxHeight;
+
+  // Fondo único
+  context.save();
+
+  context.shadowColor =
+    "rgba(0, 0, 0, 0.35)";
+  context.shadowBlur = 18;
+  context.shadowOffsetY = 8;
+
+  context.fillStyle =
+    "rgba(15, 15, 15, 0.72)";
+
+  context.beginPath();
+  context.roundRect(
+    x,
+    y,
+    boxWidth,
+    boxHeight,
+    26,
+  );
+  context.fill();
+
+  context.restore();
+
+  // Borde
+  context.strokeStyle =
+    "rgba(255, 255, 255, 0.20)";
+  context.lineWidth = 3;
+
+  context.beginPath();
+  context.roundRect(
+    x,
+    y,
+    boxWidth,
+    boxHeight,
+    26,
+  );
+  context.stroke();
+
+  // Datos
+  stats.forEach((stat, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+
+    const itemX =
+      x +
+      paddingX +
+      column * itemWidth;
+
+    const itemY =
+      y +
+      paddingY +
+      row * itemHeight;
+
+    const iconX = itemX + 48;
+    const valueX = itemX + 116;
+    const centerY = itemY + itemHeight / 2;
+
     context.textBaseline = "middle";
+    context.textAlign = "center";
 
-    stats.forEach((stat, index) => {
-      const x = startX + index * gap;
+    // Icono
+    context.fillStyle = stat.accent;
+    context.font =
+      stat.label === "★"
+        ? "900 72px Arial, sans-serif"
+        : "900 62px Arial, sans-serif";
 
-      context.globalAlpha = 1;
+    context.fillText(
+      stat.label,
+      iconX,
+      centerY,
+    );
 
-      context.fillStyle =
-        stat.label === "★"
-          ? "#facc15"
-          : "#ffffff";
+    // Número
+    context.fillStyle = "#ffffff";
+    context.font =
+      "900 58px Arial, sans-serif";
 
-      context.font =
-        "900 58px Arial, sans-serif";
-
-      context.fillText(
-        stat.label,
-        x,
-        y - 55,
-      );
-
-      context.fillStyle = "#ffffff";
-
-      context.font =
-        "900 58px Arial, sans-serif";
-
-      context.fillText(
-        String(stat.value),
-        x,
-        y + 25,
-      );
-    });
-
-    context.globalAlpha = 1;
-  }
+    context.fillText(
+      String(stat.value),
+      valueX,
+      centerY,
+    );
+  });
+}
 
   async function generateMobileCardBlob() {
     const canvas =
