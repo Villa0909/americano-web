@@ -155,7 +155,8 @@ export default async function Home() {
                         "es-MX",
                         {
                           hour: "numeric",
-                          minute: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Mexico_City",
                         },
                       )}
                     </p>
