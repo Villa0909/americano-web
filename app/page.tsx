@@ -14,6 +14,8 @@ import { PiSoccerBallFill } from "react-icons/pi";
 import { getMatches } from "@/lib/matches";
 import { getPlayers } from "@/lib/players";
 
+const TIME_ZONE = "America/Mexico_City";
+
 export default async function Home() {
   const [matches, players] = await Promise.all([
     getMatches(),
@@ -155,8 +157,8 @@ export default async function Home() {
                         "es-MX",
                         {
                           hour: "numeric",
-    minute: "2-digit",
-    timeZone: "America/Mexico_City",
+                          minute: "2-digit",
+                          timeZone: TIME_ZONE,
                         },
                       )}
                     </p>
@@ -189,6 +191,8 @@ export default async function Home() {
                   </div>
                 </div>
 
+                {/* Fecha y ubicación */}
+
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <div className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
                     <CalendarDays size={17} />
@@ -202,6 +206,7 @@ export default async function Home() {
                           weekday: "long",
                           day: "numeric",
                           month: "long",
+                          timeZone: TIME_ZONE,
                         },
                       )}
                     </span>
@@ -384,6 +389,7 @@ export default async function Home() {
                         {
                           day: "numeric",
                           month: "long",
+                          timeZone: TIME_ZONE,
                         },
                       )}
                     </div>

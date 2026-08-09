@@ -137,7 +137,7 @@ export default function ResultTemplate({
 
         <p className="mt-6 text-center text-xl tracking-[4px] text-zinc-400">
 
-          MARTINCITASFC.COM
+         martincitas-web-beta.vercel.app
 
         </p>
 

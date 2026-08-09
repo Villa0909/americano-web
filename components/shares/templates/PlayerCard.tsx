@@ -92,7 +92,7 @@ const STATS = {
 /* FOOTER */
 
 const FOOTER = {
-  x: 740,
+  x: 700,
   y: 45,
   size: 28,
   opacity: 0.7,
@@ -310,7 +310,7 @@ export default function PlayerCard({
         }}
         className="absolute z-50 whitespace-nowrap uppercase tracking-[8px] text-white"
       >
-        MARTINCITASFC.COM
+        martincitas-web-beta.vercel.app
       </p>
     </div>
   );
