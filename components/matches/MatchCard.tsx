@@ -1,3 +1,4 @@
+const TIME_ZONE = "America/Mexico_City";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,10 +35,11 @@ export default function MatchCard({
   const date = new Date(match.fecha);
 
   const formattedDate = date.toLocaleDateString("es-MX", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  timeZone: TIME_ZONE,
+});
 
   const rivalShield = match.escudo_rival
     ? `/escudos/${match.escudo_rival}`
@@ -104,9 +106,10 @@ export default function MatchCard({
   </>
 ) : (
   new Date(match.fecha).toLocaleTimeString("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: TIME_ZONE,
+})
 )}
             </div>
 
@@ -165,10 +168,11 @@ export default function MatchCard({
     {match.goles_favor} - {match.goles_contra}
   </>
 ) : (
-  new Date(match.fecha).toLocaleTimeString("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+ new Date(match.fecha).toLocaleTimeString("es-MX", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: TIME_ZONE,
+})
 )}
             </div>
 
