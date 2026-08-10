@@ -57,20 +57,22 @@ export default function MatchHeader({
     : "/logo.png";
 
   const formattedDate = new Date(
-    fecha,
-  ).toLocaleDateString("es-MX", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  fecha,
+).toLocaleDateString("es-MX", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "America/Mexico_City",
+});
 
   const matchTime = new Date(
-    fecha,
-  ).toLocaleTimeString("es-MX", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  fecha,
+).toLocaleTimeString("es-MX", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "America/Mexico_City",
+});
 
   return (
     <section className="overflow-hidden rounded-2xl bg-white shadow-md sm:rounded-3xl">
