@@ -1,7 +1,8 @@
 import { getMatches } from "@/lib/matches";
 
 import MatchCard from "@/components/matches/MatchCard";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export default async function ResultadosPage() {
   const matches = await getMatches();
 

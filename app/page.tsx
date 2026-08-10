@@ -13,7 +13,8 @@ import { PiSoccerBallFill } from "react-icons/pi";
 
 import { getMatches } from "@/lib/matches";
 import { getPlayers } from "@/lib/players";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 const TIME_ZONE = "America/Mexico_City";
 
 export default async function Home() {
