@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 
@@ -27,6 +27,7 @@ export default function RootLayout({
         <main className="min-h-screen bg-white">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );
