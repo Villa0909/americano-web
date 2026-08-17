@@ -2,21 +2,13 @@ import { supabase } from "./supabase";
 
 export interface PlayerMatchStat {
   id: number;
-
   match_id: number;
-
   player_id: string;
-
   jugo: boolean;
-
   goles: number;
-
   asistencias: number;
-
   amarillas: number;
-
   rojas: number;
-
   mvp: boolean;
 }
 
@@ -26,6 +18,22 @@ export async function createPlayerMatchStat(
   const { data, error } = await supabase
     .from("player_match_stats")
     .insert(stat)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+export async function updatePlayerMatchStat(
+  id: number,
+  stat: Partial<Omit<PlayerMatchStat, "id">>
+) {
+  const { data, error } = await supabase
+    .from("player_match_stats")
+    .update(stat)
+    .eq("id", id)
     .select()
     .single();
 
@@ -46,6 +54,7 @@ export async function getStatsByMatch(
 
   return data;
 }
+
 import { getPlayers } from "./players";
 
 export async function getMatchDetails(
