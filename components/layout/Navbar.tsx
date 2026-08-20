@@ -3,16 +3,33 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const links = [
   { name: "INICIO", href: "/" },
   { name: "PLANTILLA", href: "/plantilla" },
   { name: "RESULTADOS", href: "/resultados" },
   { name: "ESTADÍSTICAS", href: "/estadisticas" },
+  { name: "TABLA", href: "/tabla" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+
+  const [tablaNueva, setTablaNueva] = useState(false);
+
+  useEffect(() => {
+    const tablaVista = localStorage.getItem("tabla-vista");
+
+    if (!tablaVista) {
+      setTablaNueva(true);
+    }
+  }, []);
+
+  const handleTablaClick = () => {
+    localStorage.setItem("tabla-vista", "true");
+    setTablaNueva(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-md">
@@ -70,17 +87,26 @@ export default function Navbar() {
                 (link.href !== "/" &&
                   pathname.startsWith(`${link.href}/`));
 
+              const isTabla = link.href === "/tabla";
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex min-h-14 items-center border-b border-zinc-800 px-3 text-sm font-semibold tracking-[2px] last:border-b-0 ${
+                  onClick={isTabla ? handleTablaClick : undefined}
+                  className={`relative flex min-h-14 items-center border-b border-zinc-800 px-3 text-sm font-semibold tracking-[2px] last:border-b-0 ${
                     active
                       ? "bg-white text-black"
                       : "text-zinc-300 active:bg-zinc-900"
                   }`}
                 >
                   {link.name}
+
+                  {isTabla && tablaNueva && (
+                    <span className="ml-3 rounded bg-yellow-400 px-1.5 py-0.5 text-[8px] font-black tracking-normal text-zinc-900">
+                      NUEVO
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -117,10 +143,13 @@ export default function Navbar() {
                 (link.href !== "/" &&
                   pathname.startsWith(`${link.href}/`));
 
+              const isTabla = link.href === "/tabla";
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  onClick={isTabla ? handleTablaClick : undefined}
                   className={`group relative text-sm font-semibold tracking-[2px] transition ${
                     active
                       ? "text-white"
@@ -128,6 +157,12 @@ export default function Navbar() {
                   }`}
                 >
                   {link.name}
+
+                  {isTabla && tablaNueva && (
+                    <span className="absolute -right-7 -top-5 rounded bg-yellow-400 px-1.5 py-0.5 text-[8px] font-black leading-none tracking-normal text-zinc-900">
+                      NUEVO
+                    </span>
+                  )}
 
                   <span
                     className={`absolute -bottom-2 left-1/2 h-[2px] -translate-x-1/2 bg-white transition-all duration-300 ${

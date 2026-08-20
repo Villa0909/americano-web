@@ -11,6 +11,7 @@ import {
 } from "@/lib/matches";
 
 interface FormState {
+    jornada: string;
   rival: string;
   fecha: string;
   torneo: string;
@@ -23,6 +24,7 @@ ubicacion_url: string;
 }
 
 const initialForm: FormState = {
+    jornada: "",
   rival: "",
   fecha: "",
   torneo: "",
@@ -68,6 +70,10 @@ export default function MatchForm() {
     setSelectedId(match.id);
 
     setForm({
+        jornada:
+    match.jornada === null
+      ? ""
+      : String(match.jornada),
       rival: match.rival,
       fecha: formatDateForInput(match.fecha),
       torneo: match.torneo ?? "",
@@ -147,6 +153,10 @@ ubicacion_url: match.ubicacion_url ?? "",
     }
 
     const matchData = {
+        jornada:
+    form.jornada === ""
+      ? null
+      : Number(form.jornada),
       rival: form.rival.trim(),
       fecha: new Date(form.fecha).toISOString(),
       torneo: form.torneo.trim(),
@@ -250,6 +260,19 @@ ubicacion_url: form.ubicacion_url.trim() || null,
           onSubmit={handleSubmit}
           className="grid gap-6 md:grid-cols-2"
         >
+          <Input
+  label="Jornada"
+  type="number"
+  min="1"
+  placeholder="Ej. 1"
+  value={form.jornada}
+  onChange={(value) =>
+    setForm({
+      ...form,
+      jornada: value,
+    })
+  }
+/>
           <Input
             label="Rival"
             value={form.rival}

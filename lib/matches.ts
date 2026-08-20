@@ -2,18 +2,35 @@ import { supabase } from "./supabase";
 
 export interface Match {
   id: number;
+
+  jornada: number | null;
+
   rival: string;
+
   fecha: string;
+
   torneo: string | null;
+
   goles_favor: number;
+
   goles_contra: number;
+
   local: boolean;
+
   resultado: string | null;
+
   escudo_rival: string | null;
+
   created_at: string;
+
   ubicacion: string | null;
-ubicacion_url: string | null;
+
+  ubicacion_url: string | null;
 }
+
+/* =========================================================
+   OBTENER PARTIDOS
+========================================================= */
 
 export async function getMatches() {
   const { data, error } = await supabase
@@ -28,15 +45,32 @@ export async function getMatches() {
   return data as Match[];
 }
 
+/* =========================================================
+   CREAR PARTIDO
+========================================================= */
+
 export async function createMatch(match: {
+  jornada: number | null;
+
   rival: string;
+
   fecha: string;
+
   torneo: string;
+
   goles_favor: number | null;
+
   goles_contra: number | null;
+
   local: boolean;
+
   resultado: string | null;
+
   escudo_rival: string | null;
+
+  ubicacion?: string | null;
+
+  ubicacion_url?: string | null;
 }) {
   const { data, error } = await supabase
     .from("matches")
@@ -49,19 +83,34 @@ export async function createMatch(match: {
   return data as Match;
 }
 
+/* =========================================================
+   ACTUALIZAR PARTIDO
+========================================================= */
+
 export async function updateMatch(
   id: number,
   match: {
+    jornada?: number | null;
+
     rival?: string;
+
     fecha?: string;
+
     torneo?: string | null;
+
     goles_favor?: number | null;
+
     goles_contra?: number | null;
+
     local?: boolean;
+
     resultado?: string | null;
+
     escudo_rival?: string | null;
+
     ubicacion?: string | null;
-ubicacion_url?: string | null;
+
+    ubicacion_url?: string | null;
   }
 ) {
   const { data, error } = await supabase
@@ -76,7 +125,13 @@ ubicacion_url?: string | null;
   return data as Match;
 }
 
-export async function deleteMatch(id: number) {
+/* =========================================================
+   ELIMINAR
+========================================================= */
+
+export async function deleteMatch(
+  id: number
+) {
   const { error } = await supabase
     .from("matches")
     .delete()
@@ -84,6 +139,11 @@ export async function deleteMatch(id: number) {
 
   if (error) throw error;
 }
+
+/* =========================================================
+   OBTENER UNO
+========================================================= */
+
 export async function getMatch(
   id: number
 ) {

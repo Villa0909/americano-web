@@ -6,60 +6,97 @@ import MatchGallery from "./MatchGallery";
 import MatchSummary from "./MatchSummary";
 import MatchTable from "./MatchTable";
 
+import type {
+  StandingMatch,
+  Team,
+} from "@/lib/standings";
+
 interface Props {
   goles: any[];
   asistencias: any[];
   amarillas: any[];
   rojas: any[];
   mvp: any;
+
+  teams: Team[];
+  historicalMatches: StandingMatch[];
+  jornada: number;
 }
 
-type TabId = "resumen" | "galeria" | "tabla";
+type TabId =
+  | "resumen"
+  | "galeria"
+  | "tabla";
 
-export default function MatchTabs(props: Props) {
-  const [tab, setTab] = useState<TabId>("resumen");
+export default function MatchTabs(
+  props: Props
+) {
+  const [tab, setTab] =
+    useState<TabId>("resumen");
 
   return (
     <section className="mt-8 sm:mt-10">
-      {/* Pestañas */}
+
+      {/* PESTAÑAS */}
 
       <div className="grid grid-cols-3 border-b border-zinc-200">
+
         <Tab
           active={tab === "resumen"}
-          onClick={() => setTab("resumen")}
+          onClick={() =>
+            setTab("resumen")
+          }
         >
           Resumen
         </Tab>
 
         <Tab
           active={tab === "galeria"}
-          onClick={() => setTab("galeria")}
+          onClick={() =>
+            setTab("galeria")
+          }
         >
           Galería
         </Tab>
 
         <Tab
           active={tab === "tabla"}
-          onClick={() => setTab("tabla")}
+          onClick={() =>
+            setTab("tabla")
+          }
         >
           Tabla
         </Tab>
+
       </div>
 
-      {/* Contenido */}
+      {/* CONTENIDO */}
 
-     <div
-  key={tab}
-  className="mt-6 text-zinc-900 animate-[positionAppear_250ms_ease-out] sm:mt-8"
->
+      <div
+        key={tab}
+        className="mt-6 text-zinc-900 animate-[positionAppear_250ms_ease-out] sm:mt-8"
+      >
+
         {tab === "resumen" && (
           <MatchSummary {...props} />
         )}
 
-        {tab === "galeria" && <MatchGallery />}
+        {tab === "galeria" && (
+          <MatchGallery />
+        )}
 
-        {tab === "tabla" && <MatchTable />}
+        {tab === "tabla" && (
+          <MatchTable
+            teams={props.teams}
+            matches={
+              props.historicalMatches
+            }
+            jornada={props.jornada}
+          />
+        )}
+
       </div>
+
     </section>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
+import NewsModal from "@/components/NewsModal";
 
 export const metadata: Metadata = {
   title: "Martincitas C.F.",
@@ -28,6 +29,7 @@ export default function RootLayout({
           {children}
         </main>
         <Analytics />
+        <NewsModal />
       </body>
     </html>
   );

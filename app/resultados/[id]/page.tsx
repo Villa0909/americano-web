@@ -3,9 +3,14 @@ import { notFound } from "next/navigation";
 import MatchHeader from "@/components/matches/MatchHeader";
 import MatchTabs from "@/components/matches/MatchTabs";
 import MatchView from "@/components/matches/MatchView";
+import HistoricalTable from "@/components/standings/HistoricalTable";
 
 import { getMatch } from "@/lib/matches";
 import { getMatchDetails } from "@/lib/playerMatchStats";
+import {
+  getTeams,
+  getStandingMatchesByJornada,
+} from "@/lib/standings";
 
 interface Props {
   params: Promise<{
@@ -26,6 +31,15 @@ export default async function MatchPage({
 
   const stats =
     await getMatchDetails(match.id);
+
+  // Equipos de la tabla
+  const teams = await getTeams();
+
+  // Partidos de tabla hasta esta jornada
+  const historicalMatches =
+    await getStandingMatchesByJornada(
+      match.id
+    );
 
   const goles = stats.filter(
     (stat) => stat.goles > 0,
@@ -54,6 +68,7 @@ export default async function MatchPage({
       mvp={mvp}
     >
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+
         <MatchHeader
           rival={match.rival}
           escudoRival={
@@ -78,12 +93,18 @@ export default async function MatchPage({
         />
 
         <MatchTabs
-          goles={goles}
-          asistencias={asistencias}
-          amarillas={amarillas}
-          rojas={rojas}
-          mvp={mvp}
-        />
+  goles={goles}
+  asistencias={asistencias}
+  amarillas={amarillas}
+  rojas={rojas}
+  mvp={mvp}
+  teams={teams}
+  historicalMatches={historicalMatches}
+  jornada={match.id}
+/>
+
+       
+
       </main>
     </MatchView>
   );

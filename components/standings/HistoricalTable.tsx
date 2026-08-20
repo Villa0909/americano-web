@@ -12,7 +12,7 @@ interface Props {
   jornada: number;
 }
 
-export default function MatchTable({
+export default function HistoricalTable({
   teams,
   matches,
   jornada,
@@ -24,27 +24,28 @@ export default function MatchTable({
 
   return (
     <section className="mt-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-
       {/* ENCABEZADO */}
 
       <div className="border-b border-zinc-200 px-4 py-5 sm:px-6">
-        <h2 className="text-xl font-black tracking-wide sm:text-2xl">
-          TABLA
-        </h2>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-black tracking-wide sm:text-2xl">
+              TABLA
+            </h2>
 
-        <p className="mt-1 text-sm text-zinc-500">
-          Jornada {jornada}
-        </p>
+            <p className="mt-1 text-sm text-zinc-500">
+              Jornada {jornada}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* TABLA */}
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[850px] border-collapse">
-
           <thead>
             <tr className="bg-zinc-100 text-[10px] font-black uppercase tracking-wider text-zinc-500">
-
               <th className="w-10 px-2 py-3 text-center">
                 #
               </th>
@@ -82,7 +83,6 @@ export default function MatchTable({
               <th className="px-3 py-3 text-center">
                 PTS
               </th>
-
             </tr>
           </thead>
 
@@ -95,7 +95,6 @@ export default function MatchTable({
                   key={row.team.id}
                   className="border-t border-zinc-100"
                 >
-
                   {/* LUGAR */}
 
                   <td className="px-2 py-3 text-center text-sm font-black">
@@ -122,9 +121,7 @@ export default function MatchTable({
 
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-3">
-
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center">
-
                         {row.team.escudo ? (
                           <Image
                             src={row.team.escudo}
@@ -136,17 +133,15 @@ export default function MatchTable({
                         ) : (
                           <div className="h-8 w-8 rounded-full bg-zinc-200" />
                         )}
-
                       </div>
 
                       <span className="whitespace-nowrap text-sm font-bold">
                         {row.team.nombre}
                       </span>
-
                     </div>
                   </td>
 
-                  {/* JORNADAS JUGADAS */}
+                  {/* JJ */}
 
                   <td className="px-2 py-3 text-center text-sm font-semibold">
                     {row.jj}
@@ -170,13 +165,14 @@ export default function MatchTable({
                     {row.perdidos}
                   </td>
 
-                  {/* GOLES A FAVOR - CONTRA */}
+                  {/* +/- */}
 
                   <td className="bg-zinc-200 px-3 py-3 text-center text-sm font-bold">
-                    {row.gf}-{row.gc}
+                    {row.gf}-
+                    {row.gc}
                   </td>
 
-                  {/* DIFERENCIA DE GOLES */}
+                  {/* DG */}
 
                   <td className="bg-zinc-100 px-3 py-3 text-center text-sm font-bold">
                     {row.dg > 0
@@ -189,21 +185,17 @@ export default function MatchTable({
                   <td className="px-3 py-3 text-center text-sm font-black">
                     {row.puntos}
                   </td>
-
                 </tr>
               );
             })}
           </tbody>
-
         </table>
       </div>
 
       {/* LEYENDA */}
 
       <div className="border-t border-zinc-200 px-4 py-4 sm:px-6">
-
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
-
           <div className="flex items-center gap-2">
             <span className="h-3 w-1.5 bg-green-500" />
             <span>Semifinales de liga</span>
@@ -218,11 +210,8 @@ export default function MatchTable({
             <span className="h-3 w-1.5 bg-yellow-400" />
             <span>Cuartos de copa</span>
           </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }
