@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import {
+  Suspense,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function AdminLoginPage() {
-  const searchParams = useSearchParams();
+function LoginForm() {
+  const searchParams =
+    useSearchParams();
 
   const [password, setPassword] =
     useState("");
@@ -41,7 +45,9 @@ export default function AdminLoginPage() {
       );
 
       if (!response.ok) {
-        setError("Contraseña incorrecta.");
+        setError(
+          "Contraseña incorrecta."
+        );
         return;
       }
 
@@ -49,7 +55,8 @@ export default function AdminLoginPage() {
         searchParams.get("redirect") ||
         "/admin";
 
-      window.location.href = redirect;
+      window.location.href =
+        redirect;
     } catch (error) {
       console.error(error);
 
@@ -119,5 +126,21 @@ export default function AdminLoginPage() {
 
       </div>
     </main>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-zinc-100">
+          <p className="font-bold">
+            Cargando...
+          </p>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
