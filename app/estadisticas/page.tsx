@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+
 import {
   CalendarDays,
   ChartNoAxesColumnIncreasing,
@@ -15,6 +16,8 @@ import { SportShoe } from "lucide-react";
 
 import { getMatches } from "@/lib/matches";
 import { getPlayers } from "@/lib/players";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function createRanking(
   players: any[],
