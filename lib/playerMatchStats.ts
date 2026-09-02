@@ -1,15 +1,25 @@
 import { supabase } from "./supabase";
+import { getPlayers } from "./players";
 
 export interface PlayerMatchStat {
   id: number;
   match_id: number;
   player_id: string;
   jugo: boolean;
-  goles: number;
-  asistencias: number;
-  amarillas: number;
-  rojas: number;
-  mvp: boolean;
+
+  recepciones: number;
+  yardas: number;
+  touchdowns: number;
+
+  pases_completos: number;
+  yardas_pase: number;
+  touchdowns_pase: number;
+  touchdowns_carrera: number;
+
+  tackles: number;
+  intercepciones: number;
+  sacks: number;
+  touchdowns_defensivos: number;
 }
 
 export async function createPlayerMatchStat(
@@ -42,9 +52,7 @@ export async function updatePlayerMatchStat(
   return data;
 }
 
-export async function getStatsByMatch(
-  matchId: number
-) {
+export async function getStatsByMatch(matchId: number) {
   const { data, error } = await supabase
     .from("player_match_stats")
     .select("*")
@@ -52,14 +60,10 @@ export async function getStatsByMatch(
 
   if (error) throw error;
 
-  return data;
+  return data as PlayerMatchStat[];
 }
 
-import { getPlayers } from "./players";
-
-export async function getMatchDetails(
-  matchId: number
-) {
+export async function getMatchDetails(matchId: number) {
   const [stats, players] = await Promise.all([
     getStatsByMatch(matchId),
     getPlayers(),
@@ -73,6 +77,7 @@ export async function getMatchDetails(
     return {
       ...stat,
       nombre: player?.nombre ?? "Jugador",
+      posicion: player?.posicion ?? null,
     };
   });
 }

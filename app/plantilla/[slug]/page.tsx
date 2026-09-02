@@ -33,32 +33,105 @@ export default async function PlayerPage({
     notFound();
   }
 
-  const playerStats: PlayerStat[] = [
-    {
-      title: "GOLES",
-      value: Number(player.goles ?? 0),
-    },
-    {
-      title: "ASISTENCIAS",
-      value: Number(player.asistencias ?? 0),
-    },
-    {
-      title: "PARTIDOS",
-      value: Number(player.partidos ?? 0),
-    },
-    {
-      title: "MVP",
-      value: Number(player.mvps ?? 0),
-    },
-  ];
+  const playerStats: PlayerStat[] = [];
 
-  if (player.posicion === "Portero") {
-    playerStats.push({
-      title: "PORTERÍAS A 0",
-      value: Number(
-        player.porterias_cero ?? 0,
-      ),
-    });
+  /* =========================
+     OFFENSE
+  ========================= */
+
+  if (
+    player.posicion === "Receptor" ||
+    player.posicion === "Corredor"
+  ) {
+    playerStats.push(
+      {
+        title: "RECEPCIONES",
+        value: Number(player.recepciones ?? 0),
+      },
+      {
+        title: "YARDAS",
+        value: Number(player.yardas ?? 0),
+      },
+      {
+        title: "TOUCHDOWNS",
+        value: Number(player.touchdowns ?? 0),
+      },
+    );
+  }
+
+  if (player.posicion === "Quarterback") {
+    playerStats.push(
+      {
+        title: "PASES COMPLETOS",
+        value: Number(
+          player.pases_completos ?? 0,
+        ),
+      },
+      {
+        title: "YARDAS DE PASE",
+        value: Number(
+          player.yardas_pase ?? 0,
+        ),
+      },
+      {
+        title: "TD DE PASE",
+        value: Number(
+          player.touchdowns_pase ?? 0,
+        ),
+      },
+      {
+        title: "TD DE CARRERA",
+        value: Number(
+          player.touchdowns_carrera ?? 0,
+        ),
+      },
+    );
+  }
+
+  /* =========================
+     DEFENSE
+  ========================= */
+
+  if (player.posicion === "D-Line") {
+    playerStats.push(
+      {
+        title: "TACKLES",
+        value: Number(player.tackles ?? 0),
+      },
+      {
+        title: "SACKS",
+        value: Number(player.sacks ?? 0),
+      },
+    );
+  }
+
+  if (
+    player.posicion === "Linebacker" ||
+    player.posicion === "Cornerback" ||
+    player.posicion === "Safety"
+  ) {
+    playerStats.push(
+      {
+        title: "TACKLES",
+        value: Number(player.tackles ?? 0),
+      },
+      {
+        title: "INTERCEPCIONES",
+        value: Number(
+          player.intercepciones ?? 0,
+        ),
+      },
+      {
+        title: "SACKS",
+        value: Number(player.sacks ?? 0),
+      },
+      {
+        title: "TD DEFENSIVOS",
+        value: Number(
+          player.touchdowns_defensivos ?? 0,
+        ),
+      },
+    );
   }
 
   const visibleStats = playerStats.filter(
@@ -76,22 +149,27 @@ export default async function PlayerPage({
 
   return (
     <PlayerView player={player}>
-      <main className="min-h-screen bg-white text-black">
+      <main className="min-h-screen bg-[#062A63] text-white">
         <div className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+
+          {/* VOLVER */}
           <Link
             href="/plantilla"
-            className="inline-flex text-sm font-medium text-zinc-600 transition hover:text-black"
+            className="inline-flex items-center text-sm font-black uppercase tracking-wide text-blue-200 transition hover:text-yellow-400"
           >
             ← Volver a la plantilla
           </Link>
 
           <div className="mt-6 grid gap-7 sm:mt-8 sm:gap-9 lg:grid-cols-[380px_1fr] lg:gap-10">
-            {/* FOTO */}
 
-            <div className="mx-auto w-full max-w-[430px] overflow-hidden rounded-2xl bg-zinc-100 shadow-lg lg:mx-0">
+            {/* =========================
+                FOTO
+            ========================= */}
+
+            <div className="mx-auto w-full max-w-[430px] overflow-hidden rounded-3xl border border-yellow-400/30 bg-[#0B3B82] shadow-2xl lg:mx-0">
               <div className="relative h-[460px] w-full sm:h-[520px] lg:h-[550px]">
                 <Image
-                  src={player.foto}
+                  src={player.foto || "/logo.png"}
                   alt={player.nombre}
                   fill
                   priority
@@ -101,28 +179,35 @@ export default async function PlayerPage({
               </div>
             </div>
 
-            {/* INFORMACIÓN */}
+            {/* =========================
+                INFORMACIÓN
+            ========================= */}
 
             <div className="min-w-0">
-              <p className="text-sm font-medium uppercase tracking-[3px] text-zinc-600 sm:text-base sm:tracking-[4px]">
+
+              {/* POSICIÓN */}
+              <p className="text-sm font-black uppercase tracking-[3px] text-yellow-400 sm:text-base sm:tracking-[4px]">
                 {player.posicion}
               </p>
 
+              {/* NOMBRE */}
               <div className="mt-2 flex items-start justify-between gap-4">
-                <h1 className="min-w-0 break-words text-4xl font-black leading-[0.95] sm:text-5xl lg:text-6xl">
+                <h1 className="min-w-0 break-words text-4xl font-black leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-6xl">
                   {player.nombre}
                 </h1>
 
-                <span className="shrink-0 text-3xl font-black text-zinc-300 sm:text-4xl">
+                <span className="shrink-0 text-3xl font-black text-yellow-400 sm:text-4xl">
                   #{player.numero}
                 </span>
               </div>
 
-              {/* ESTADÍSTICAS */}
+              {/* =========================
+                  ESTADÍSTICAS
+              ========================= */}
 
               {visibleStats.length > 0 && (
                 <div
-                  className={`mt-8 grid gap-2 sm:mt-10 sm:gap-4 lg:gap-6 ${statsColumns}`}
+                  className={`mt-8 grid gap-3 sm:mt-10 sm:gap-4 lg:gap-5 ${statsColumns}`}
                 >
                   {visibleStats.map((stat) => (
                     <Stat
@@ -134,9 +219,12 @@ export default async function PlayerPage({
                 </div>
               )}
 
-              {/* DATOS */}
+              {/* =========================
+                  DATOS
+              ========================= */}
 
-              <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-7 border-y border-zinc-200 py-8 sm:mt-12 sm:gap-x-8 sm:gap-y-8">
+              <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-7 border-y border-yellow-400/30 py-8 sm:mt-12 sm:gap-x-8 sm:gap-y-8">
+
                 <Info
                   title="Edad"
                   value={`${player.edad} años`}
@@ -156,21 +244,27 @@ export default async function PlayerPage({
                   title="Pie hábil"
                   value={player.pie}
                 />
+
               </div>
 
-              {/* LEMA */}
+              {/* =========================
+                  FRASE PERSONAL
+              ========================= */}
 
               {player.descripcion?.trim() && (
                 <div className="mt-9 sm:mt-12">
-                  <h2 className="mb-3 text-xl font-black uppercase tracking-wide sm:text-2xl">
+                  <h2 className="mb-3 text-xl font-black uppercase tracking-wide text-yellow-400 sm:text-2xl">
                     Frase Personal
                   </h2>
 
-                  <p className="text-base italic leading-7 text-zinc-700 sm:leading-8">
-                    “{player.descripcion}”
-                  </p>
+                  <div className="rounded-2xl border border-yellow-400/20 bg-[#0B3B82] px-5 py-5 shadow-lg sm:px-6">
+                    <p className="text-base italic leading-7 text-blue-100 sm:leading-8">
+                      “{player.descripcion}”
+                    </p>
+                  </div>
                 </div>
               )}
+
             </div>
           </div>
         </div>
@@ -187,12 +281,12 @@ function Stat({
   value: number;
 }) {
   return (
-    <div className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-4 text-center shadow-sm sm:p-5 lg:p-6">
-      <p className="text-[9px] font-bold leading-tight tracking-[1px] text-zinc-600 sm:text-xs sm:tracking-[2px] lg:text-sm">
+    <div className="min-w-0 rounded-2xl border border-yellow-400/30 bg-yellow-400 px-2 py-4 text-center shadow-lg sm:p-5 lg:p-6">
+      <p className="text-[9px] font-black leading-tight tracking-[1px] text-[#062A63] sm:text-xs sm:tracking-[2px] lg:text-sm">
         {title}
       </p>
 
-      <h2 className="mt-2 text-3xl font-black sm:text-4xl lg:text-5xl">
+      <h2 className="mt-2 text-3xl font-black text-[#062A63] sm:text-4xl lg:text-5xl">
         {value}
       </h2>
     </div>
@@ -208,11 +302,11 @@ function Info({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-xs font-bold uppercase tracking-[2px] text-zinc-600 sm:text-sm sm:tracking-[3px]">
+      <p className="text-xs font-black uppercase tracking-[2px] text-yellow-400 sm:text-sm sm:tracking-[3px]">
         {title}
       </p>
 
-      <h2 className="mt-2 break-words text-lg font-bold sm:text-2xl">
+      <h2 className="mt-2 break-words text-lg font-bold text-white sm:text-2xl">
         {value}
       </h2>
     </div>

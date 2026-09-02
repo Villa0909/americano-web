@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import ImageUpload from "@/components/admin/ImageUpload";
-import MatchForm from "@/components/admin/MatchForm";
 
 import {
   createPlayer,
@@ -11,7 +11,10 @@ import {
   updatePlayer,
 } from "@/lib/players";
 
-import type { Player } from "@/types/player";
+import type {
+  Player,
+  PlayerPosition,
+} from "@/types/player";
 
 function createSlug(text: string) {
   return text
@@ -26,40 +29,60 @@ interface PlayerForm {
   nombre: string;
   slug: string;
   numero: string;
-  posicion:
-    | "Portero"
-    | "Defensa"
-    | "Mediocampista"
-    | "Delantero";
+
+  posicion: PlayerPosition;
+
   foto: string;
+
   edad: string;
   altura: string;
   peso: string;
+
   pie: "Derecho" | "Izquierdo";
+
   descripcion: string;
-  porterias_cero: string;
 }
 
 const initialForm: PlayerForm = {
   nombre: "",
   slug: "",
   numero: "",
-  posicion: "Mediocampista",
+
+  posicion: "Receptor",
+
   foto: "",
+
   edad: "",
   altura: "",
   peso: "",
+
   pie: "Derecho",
+
   descripcion: "",
-  porterias_cero: "",
 };
 
-export default function AdminPage() {
-  const [loading, setLoading] =
-    useState(false);
+const OFFENSE_POSITIONS: PlayerPosition[] = [
+  "O-Line",
+  "Receptor",
+  "Corredor",
+  "Quarterback",
+];
 
-  const [players, setPlayers] =
-    useState<Player[]>([]);
+const DEFENSE_POSITIONS: PlayerPosition[] = [
+  "D-Line",
+  "Linebacker",
+  "Cornerback",
+  "Safety",
+];
+
+type View = "menu" | "add" | "edit";
+
+export default function AdminPage() {
+  const [view, setView] = useState<View>("menu");
+
+  const [loading, setLoading] = useState(false);
+
+  const [players, setPlayers] = useState<Player[]>([]);
 
   const [selectedId, setSelectedId] =
     useState<string | null>(null);
@@ -74,7 +97,6 @@ export default function AdminPage() {
   async function loadPlayers() {
     try {
       const data = await getPlayers();
-
       setPlayers(data);
     } catch (error) {
       console.error(
@@ -89,6 +111,21 @@ export default function AdminPage() {
     setForm(initialForm);
   }
 
+  function goToMenu() {
+    clearForm();
+    setView("menu");
+  }
+
+  function goToAdd() {
+    clearForm();
+    setView("add");
+  }
+
+  function goToEdit() {
+    clearForm();
+    setView("edit");
+  }
+
   function loadPlayer(player: Player) {
     setSelectedId(player.id);
 
@@ -96,16 +133,27 @@ export default function AdminPage() {
       nombre: player.nombre,
       slug: player.slug,
       numero: String(player.numero),
+
       posicion: player.posicion,
+
       foto: player.foto,
+
       edad: String(player.edad),
       altura: String(player.altura),
       peso: String(player.peso),
+
       pie: player.pie,
+
       descripcion: player.descripcion,
-      porterias_cero: String(
-        player.porterias_cero ?? 0,
-      ),
+    });
+  }
+
+  function handlePositionChange(
+    position: PlayerPosition,
+  ) {
+    setForm({
+      ...form,
+      posicion: position,
     });
   }
 
@@ -123,12 +171,6 @@ export default function AdminPage() {
       alert("Escribe el número del jugador.");
       return;
     }
-
-    const selectedPlayer =
-      players.find(
-        (player) =>
-          player.id === selectedId,
-      );
 
     const playerData = {
       nombre: form.nombre.trim(),
@@ -153,23 +195,6 @@ export default function AdminPage() {
 
       descripcion:
         form.descripcion.trim(),
-
-      /*
-       * Conservamos sus MVP al editar.
-       * Un jugador nuevo comienza en cero.
-       */
-      mvps: selectedPlayer?.mvps ?? 0,
-
-      /*
-       * Solo los porteros pueden tener
-       * porterías a cero.
-       */
-      porterias_cero:
-        form.posicion === "Portero"
-          ? Number(
-              form.porterias_cero || 0,
-            )
-          : 0,
     };
 
     try {
@@ -189,7 +214,10 @@ export default function AdminPage() {
       }
 
       await loadPlayers();
+
       clearForm();
+
+      setView("menu");
     } catch (error: unknown) {
       console.error(error);
 
@@ -205,169 +233,536 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-      {/* Encabezado */}
+    <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      {/* =========================
+          ENCABEZADO
+      ========================= */}
 
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-4xl font-black sm:text-5xl">
-          ADMIN PANEL
+      <div className="mb-8">
+        <p className="text-xs font-bold uppercase tracking-[3px] text-zinc-400">
+          ADMINISTRACIÓN
+        </p>
+
+        <h1 className="mt-1 text-4xl font-black sm:text-5xl">
+          JUGADORES
         </h1>
-
-        <button
-          type="button"
-          onClick={clearForm}
-          className="rounded-lg border border-zinc-300 px-5 py-2 font-semibold transition hover:bg-zinc-100"
-        >
-          Nuevo jugador
-        </button>
       </div>
 
-      {/* Partidos */}
+      {/* =========================
+          MINI HOTBAR
+      ========================= */}
 
-      <section className="mb-20">
-        <h2 className="mb-8 text-3xl font-black sm:text-4xl">
-          PARTIDOS
-        </h2>
+      <nav className="mb-10 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="flex min-w-max">
+          <Link
+            href="/admin"
+            className="
+              border-b-2
+              border-black
+              px-5
+              py-4
+              text-sm
+              font-black
+              text-black
+              transition
+              sm:px-7
+            "
+          >
+            👤 Jugadores
+          </Link>
 
-        <MatchForm />
-      </section>
+          <Link
+            href="/admin/partidos"
+            className="
+              border-b-2
+              border-transparent
+              px-5
+              py-4
+              text-sm
+              font-bold
+              text-zinc-500
+              transition
+              hover:border-zinc-300
+              hover:text-black
+              sm:px-7
+            "
+          >
+            🏈 Partidos
+          </Link>
 
-      {/* Lista de jugadores */}
+          <Link
+            href="/admin/tabla"
+            className="
+              border-b-2
+              border-transparent
+              px-5
+              py-4
+              text-sm
+              font-bold
+              text-zinc-500
+              transition
+              hover:border-zinc-300
+              hover:text-black
+              sm:px-7
+            "
+          >
+            📊 Tabla
+          </Link>
+        </div>
+      </nav>
 
-      <section className="mb-10 rounded-xl border border-zinc-200 bg-white p-5">
-        <h2 className="mb-4 text-xl font-bold">
-          Jugadores
-        </h2>
+      {/* =========================
+          MENÚ PRINCIPAL
+      ========================= */}
 
-        <div className="grid gap-3">
-          {players.length === 0 ? (
-            <p className="rounded-lg bg-zinc-50 px-4 py-8 text-center text-zinc-500">
-              No hay jugadores registrados.
+      {view === "menu" && (
+        <section>
+          <div className="mb-5">
+            <h2 className="text-2xl font-black">
+              Administrar jugadores
+            </h2>
+
+            <p className="mt-1 text-sm text-zinc-500">
+              Selecciona qué quieres hacer.
             </p>
-          ) : (
-            players.map((player) => (
-              <button
-                key={player.id}
-                type="button"
-                onClick={() =>
-                  loadPlayer(player)
-                }
-                className="flex items-center justify-between gap-4 rounded-lg border border-zinc-200 p-4 text-left transition hover:bg-zinc-50"
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            {/* AGREGAR */}
+
+            <button
+              type="button"
+              onClick={goToAdd}
+              className="
+                group
+                rounded-2xl
+                border
+                border-zinc-200
+                bg-white
+                p-6
+                text-left
+                shadow-sm
+                transition
+                hover:-translate-y-1
+                hover:border-zinc-300
+                hover:shadow-md
+              "
+            >
+              <div
+                className="
+                  mb-6
+                  flex
+                  h-14
+                  w-14
+                  items-center
+                  justify-center
+                  rounded-xl
+                  bg-black
+                  text-2xl
+                  text-white
+                  transition
+                  group-hover:scale-105
+                "
               >
-                <div className="min-w-0">
-                  <h3 className="truncate font-bold">
-                    {player.nombre}
-                  </h3>
+                +
+              </div>
 
-                  <p className="text-sm text-zinc-500">
-                    #{player.numero} ·{" "}
-                    {player.posicion}
-                  </p>
+              <h3 className="text-xl font-black">
+                Agregar jugador
+              </h3>
 
-                  {player.posicion ===
-                    "Portero" &&
-                    player.porterias_cero >
-                      0 && (
-                      <p className="mt-1 text-xs font-semibold text-zinc-600">
-                        {
-                          player.porterias_cero
-                        }{" "}
-                        porterías a cero
+              <p className="mt-2 text-sm leading-6 text-zinc-500">
+                Registra un nuevo jugador en la plantilla.
+              </p>
+            </button>
+
+            {/* EDITAR */}
+
+            <button
+              type="button"
+              onClick={goToEdit}
+              className="
+                group
+                rounded-2xl
+                border
+                border-zinc-200
+                bg-white
+                p-6
+                text-left
+                shadow-sm
+                transition
+                hover:-translate-y-1
+                hover:border-zinc-300
+                hover:shadow-md
+              "
+            >
+              <div
+                className="
+                  mb-6
+                  flex
+                  h-14
+                  w-14
+                  items-center
+                  justify-center
+                  rounded-xl
+                  bg-black
+                  text-xl
+                  text-white
+                  transition
+                  group-hover:scale-105
+                "
+              >
+                ✎
+              </div>
+
+              <h3 className="text-xl font-black">
+                Editar jugador
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-zinc-500">
+                Selecciona un jugador existente para modificar sus datos.
+              </p>
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* =========================
+          AGREGAR JUGADOR
+      ========================= */}
+
+      {view === "add" && (
+        <section>
+          <button
+            type="button"
+            onClick={goToMenu}
+            className="mb-6 text-sm font-bold text-zinc-500 transition hover:text-black"
+          >
+            ← Volver a jugadores
+          </button>
+
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-8"
+          >
+            <div>
+              <h2 className="text-2xl font-black">
+                Agregar jugador
+              </h2>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Completa los datos del nuevo jugador.
+              </p>
+            </div>
+
+            <PlayerFields
+              form={form}
+              setForm={setForm}
+              handlePositionChange={handlePositionChange}
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="
+                rounded-xl
+                bg-black
+                px-8
+                py-3
+                font-bold
+                text-white
+                transition
+                hover:bg-zinc-800
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
+            >
+              {loading
+                ? "Guardando..."
+                : "Guardar jugador"}
+            </button>
+          </form>
+        </section>
+      )}
+
+      {/* =========================
+          EDITAR JUGADOR
+      ========================= */}
+
+      {view === "edit" && !selectedId && (
+        <section>
+          <button
+            type="button"
+            onClick={goToMenu}
+            className="mb-6 text-sm font-bold text-zinc-500 transition hover:text-black"
+          >
+            ← Volver a jugadores
+          </button>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black">
+                  Editar jugador
+                </h2>
+
+                <p className="mt-1 text-sm text-zinc-500">
+                  Selecciona el jugador que quieres modificar.
+                </p>
+              </div>
+
+              <span className="rounded-lg bg-zinc-100 px-3 py-2 text-sm font-bold text-zinc-500">
+                {players.length}
+              </span>
+            </div>
+
+            <div className="grid gap-3">
+              {players.length === 0 ? (
+                <p className="rounded-lg bg-zinc-50 px-4 py-8 text-center text-zinc-500">
+                  No hay jugadores registrados.
+                </p>
+              ) : (
+                players.map((player) => (
+                  <button
+                    key={player.id}
+                    type="button"
+                    onClick={() => loadPlayer(player)}
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-4
+                      rounded-xl
+                      border
+                      border-zinc-200
+                      p-4
+                      text-left
+                      transition
+                      hover:bg-zinc-50
+                    "
+                  >
+                    <div className="min-w-0">
+                      <h3 className="truncate font-bold">
+                        {player.nombre}
+                      </h3>
+
+                      <p className="text-sm text-zinc-500">
+                        #{player.numero} ·{" "}
+                        {player.posicion}
                       </p>
-                    )}
-                </div>
+                    </div>
 
-                <span className="shrink-0 rounded bg-black px-4 py-2 text-sm font-bold text-white">
-                  Editar
-                </span>
+                    <span className="shrink-0 rounded-lg bg-black px-4 py-2 text-sm font-bold text-white">
+                      Editar
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* =========================
+          FORMULARIO DE EDICIÓN
+      ========================= */}
+
+      {view === "edit" && selectedId && (
+        <section>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedId(null);
+            }}
+            className="mb-6 text-sm font-bold text-zinc-500 transition hover:text-black"
+          >
+            ← Volver a jugadores
+          </button>
+
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-8"
+          >
+            <div>
+              <h2 className="text-2xl font-black">
+                Editar jugador
+              </h2>
+
+              <p className="mt-1 text-sm text-zinc-500">
+                Modifica los datos del jugador.
+              </p>
+            </div>
+
+            <PlayerFields
+              form={form}
+              setForm={setForm}
+              handlePositionChange={handlePositionChange}
+            />
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                disabled={loading}
+                className="
+                  rounded-xl
+                  bg-black
+                  px-8
+                  py-3
+                  font-bold
+                  text-white
+                  transition
+                  hover:bg-zinc-800
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+                {loading
+                  ? "Guardando..."
+                  : "Actualizar jugador"}
               </button>
-            ))
-          )}
-        </div>
-      </section>
 
-      {/* Formulario de jugador */}
+              <button
+                type="button"
+                onClick={() => setSelectedId(null)}
+                className="
+                  rounded-xl
+                  border
+                  border-zinc-300
+                  px-8
+                  py-3
+                  font-bold
+                  text-black
+                  transition
+                  hover:bg-zinc-100
+                "
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+    </main>
+  );
+}
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-8"
-      >
-        <div>
-          <h2 className="text-2xl font-black">
-            {selectedId
-              ? "Editar jugador"
-              : "Nuevo jugador"}
-          </h2>
+/* =========================
+   CAMPOS DEL JUGADOR
+========================= */
 
-          <p className="mt-1 text-sm text-zinc-500">
-            Completa los datos del jugador.
-          </p>
-        </div>
+function PlayerFields({
+  form,
+  setForm,
+  handlePositionChange,
+}: {
+  form: PlayerForm;
+  setForm: React.Dispatch<
+    React.SetStateAction<PlayerForm>
+  >;
+  handlePositionChange: (
+    position: PlayerPosition,
+  ) => void;
+}) {
+  return (
+    <>
+      {/* NOMBRE */}
 
-        <Input
-          label="Nombre"
-          value={form.nombre}
-          onChange={(value) =>
-            setForm({
-              ...form,
-              nombre: value,
-              slug: createSlug(value),
-            })
-          }
-        />
+      <Input
+        label="Nombre"
+        value={form.nombre}
+        onChange={(value) =>
+          setForm({
+            ...form,
+            nombre: value,
+            slug: createSlug(value),
+          })
+        }
+      />
 
-        <Input
-          label="Número"
-          type="number"
-          min="0"
-          value={form.numero}
-          onChange={(value) =>
-            setForm({
-              ...form,
-              numero: value,
-            })
-          }
-        />
+      {/* NÚMERO */}
 
-        <Select
-          label="Posición"
+      <Input
+        label="Número"
+        type="number"
+        min="0"
+        value={form.numero}
+        onChange={(value) =>
+          setForm({
+            ...form,
+            numero: value,
+          })
+        }
+      />
+
+      {/* POSICIÓN */}
+
+      <div>
+        <label className="mb-2 block font-semibold">
+          Posición
+        </label>
+
+        <select
           value={form.posicion}
-          onChange={(value) =>
-            setForm({
-              ...form,
-              posicion:
-                value as PlayerForm["posicion"],
-            })
+          onChange={(event) =>
+            handlePositionChange(
+              event.target.value as PlayerPosition,
+            )
           }
-        />
+          className="
+            w-full
+            rounded-lg
+            border
+            border-zinc-300
+            bg-white
+            p-3
+            text-black
+            outline-none
+            focus:border-black
+          "
+        >
+          <optgroup label="OFFENSE">
+            {OFFENSE_POSITIONS.map(
+              (position) => (
+                <option
+                  key={position}
+                  value={position}
+                >
+                  {position}
+                </option>
+              ),
+            )}
+          </optgroup>
 
-        {/* Solo aparece para porteros */}
+          <optgroup label="DEFENSE">
+            {DEFENSE_POSITIONS.map(
+              (position) => (
+                <option
+                  key={position}
+                  value={position}
+                >
+                  {position}
+                </option>
+              ),
+            )}
+          </optgroup>
+        </select>
+      </div>
 
-        {form.posicion === "Portero" && (
-          <Input
-            label="Porterías a cero"
-            type="number"
-            min="0"
-            value={form.porterias_cero}
-            onChange={(value) =>
-              setForm({
-                ...form,
-                porterias_cero: value,
-              })
-            }
-          />
-        )}
+      {/* FOTO */}
 
-        <ImageUpload
-          value={form.foto}
-          onChange={(url) =>
-            setForm({
-              ...form,
-              foto: url,
-            })
-          }
-        />
+      <ImageUpload
+        value={form.foto}
+        onChange={(url) =>
+          setForm({
+            ...form,
+            foto: url,
+          })
+        }
+      />
 
+      {/* DATOS */}
+
+      <div className="grid gap-6 sm:grid-cols-2">
         <Input
           label="Edad"
           type="number"
@@ -418,46 +813,52 @@ export default function AdminPage() {
             setForm({
               ...form,
               pie:
-                value as PlayerForm["pie"],
+                value as
+                  | "Derecho"
+                  | "Izquierdo",
             })
           }
         />
+      </div>
 
-        <div>
-          <label className="mb-2 block font-semibold">
-            Lema
-          </label>
+      {/* LEMA */}
 
-          <textarea
-            rows={4}
-            value={form.descripcion}
-            onChange={(event) =>
-              setForm({
-                ...form,
-                descripcion:
-                  event.target.value,
-              })
-            }
-            placeholder="Escribe el lema del jugador..."
-            className="w-full rounded-lg border border-zinc-300 bg-white p-3 text-black outline-none focus:border-black"
-          />
-        </div>
+      <div>
+        <label className="mb-2 block font-semibold">
+          Lema
+        </label>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-xl bg-black px-8 py-3 font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading
-            ? "Guardando..."
-            : selectedId
-              ? "Actualizar jugador"
-              : "Guardar jugador"}
-        </button>
-      </form>
-    </main>
+        <textarea
+          rows={4}
+          value={form.descripcion}
+          onChange={(event) =>
+            setForm({
+              ...form,
+              descripcion:
+                event.target.value,
+            })
+          }
+          placeholder="Escribe el lema del jugador..."
+          className="
+            w-full
+            rounded-lg
+            border
+            border-zinc-300
+            bg-white
+            p-3
+            text-black
+            outline-none
+            focus:border-black
+          "
+        />
+      </div>
+    </>
   );
 }
+
+/* =========================
+   INPUT
+========================= */
 
 function Input({
   label,
@@ -485,11 +886,25 @@ function Input({
         onChange={(event) =>
           onChange(event.target.value)
         }
-        className="w-full rounded-lg border border-zinc-300 bg-white p-3 text-black outline-none focus:border-black"
+        className="
+          w-full
+          rounded-lg
+          border
+          border-zinc-300
+          bg-white
+          p-3
+          text-black
+          outline-none
+          focus:border-black
+        "
       />
     </div>
   );
 }
+
+/* =========================
+   SELECT
+========================= */
 
 function Select({
   label,
@@ -502,13 +917,7 @@ function Select({
   onChange: (value: string) => void;
   options?: string[];
 }) {
-  const values =
-    options ?? [
-      "Portero",
-      "Defensa",
-      "Mediocampista",
-      "Delantero",
-    ];
+  const values = options ?? [];
 
   return (
     <div>
@@ -521,7 +930,17 @@ function Select({
         onChange={(event) =>
           onChange(event.target.value)
         }
-        className="w-full rounded-lg border border-zinc-300 bg-white p-3 text-black outline-none focus:border-black"
+        className="
+          w-full
+          rounded-lg
+          border
+          border-zinc-300
+          bg-white
+          p-3
+          text-black
+          outline-none
+          focus:border-black
+        "
       >
         {values.map((option) => (
           <option

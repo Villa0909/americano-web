@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import MatchHeader from "@/components/matches/MatchHeader";
 import MatchTabs from "@/components/matches/MatchTabs";
 import MatchView from "@/components/matches/MatchView";
-import HistoricalTable from "@/components/standings/HistoricalTable";
 
 import { getMatch } from "@/lib/matches";
 import { getMatchDetails } from "@/lib/playerMatchStats";
+
 import {
   getTeams,
   getStandingMatchesByJornada,
@@ -32,39 +32,40 @@ export default async function MatchPage({
   const stats =
     await getMatchDetails(match.id);
 
-  // Equipos de la tabla
   const teams = await getTeams();
 
-  // Partidos de tabla hasta esta jornada
   const historicalMatches =
     await getStandingMatchesByJornada(
       match.id
     );
 
-  const goles = stats.filter(
-    (stat) => stat.goles > 0,
-  );
+  /*
+   * ESTADÍSTICAS DE AMERICANO
+   */
 
-  const asistencias = stats.filter(
-    (stat) => stat.asistencias > 0,
-  );
+  const jugadoresConEstadisticas =
+    stats.filter(
+      (stat) =>
+        stat.recepciones > 0 ||
+        stat.yardas > 0 ||
+        stat.touchdowns > 0 ||
+        stat.pases_completos > 0 ||
+        stat.yardas_pase > 0 ||
+        stat.touchdowns_pase > 0 ||
+        stat.touchdowns_carrera > 0 ||
+        stat.tackles > 0 ||
+        stat.intercepciones > 0 ||
+        stat.sacks > 0 ||
+        stat.touchdowns_defensivos > 0
+    );
 
-  const amarillas = stats.filter(
-    (stat) => stat.amarillas > 0,
-  );
-
-  const rojas = stats.filter(
-    (stat) => stat.rojas > 0,
-  );
-
-  const mvp =
-    stats.find((stat) => stat.mvp) ?? null;
+  const mvp = null;
 
   return (
     <MatchView
       match={match}
-      goles={goles}
-      asistencias={asistencias}
+      goles={jugadoresConEstadisticas}
+      asistencias={[]}
       mvp={mvp}
     >
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -82,7 +83,7 @@ export default async function MatchPage({
           golesContra={
             match.goles_contra
           }
-          goleadores={goles}
+          goleadores={jugadoresConEstadisticas}
           ubicacion={
             match.ubicacion
           }
@@ -93,17 +94,17 @@ export default async function MatchPage({
         />
 
         <MatchTabs
-  goles={goles}
-  asistencias={asistencias}
-  amarillas={amarillas}
-  rojas={rojas}
-  mvp={mvp}
-  teams={teams}
-  historicalMatches={historicalMatches}
-  jornada={match.id}
-/>
-
-       
+          goles={jugadoresConEstadisticas}
+          asistencias={[]}
+          amarillas={[]}
+          rojas={[]}
+          mvp={mvp}
+          teams={teams}
+          historicalMatches={
+            historicalMatches
+          }
+          jornada={match.id}
+        />
 
       </main>
     </MatchView>

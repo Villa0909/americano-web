@@ -232,8 +232,7 @@ export default function MatchView({
           type="button"
           disabled={generating}
           onClick={() => void shareResult()}
-          className="fixed bottom-5 right-4 z-40 rounded-full bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-xl transition active:scale-95 disabled:opacity-50 sm:bottom-8 sm:right-8 sm:rounded-xl sm:px-6 sm:text-base"
-        >
+          className="hidden"        >
           {generating
             ? "Generando..."
             : "Compartir resultado"}

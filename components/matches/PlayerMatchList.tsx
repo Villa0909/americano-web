@@ -3,25 +3,29 @@
 import { useEffect, useState } from "react";
 
 import PlayerMatchCard from "./PlayerMatchCard";
-
 import { getPlayers } from "@/lib/players";
+import { PlayerPosition } from "@/types/player";
 
 export interface MatchPlayerStats {
   player_id: string;
-
   nombre: string;
+  posicion: PlayerPosition;
 
   jugo: boolean;
 
-  goles: number;
+  recepciones: number;
+  yardas: number;
+  touchdowns: number;
 
-  asistencias: number;
+  pases_completos: number;
+  yardas_pase: number;
+  touchdowns_pase: number;
+  touchdowns_carrera: number;
 
-  amarilla: boolean;
-
-  roja: boolean;
-
-  mvp: boolean;
+  tackles: number;
+  intercepciones: number;
+  sacks: number;
+  touchdowns_defensivos: number;
 }
 
 interface Props {
@@ -37,30 +41,41 @@ export default function PlayerMatchList({
 
   useEffect(() => {
     async function loadPlayers() {
-      const players = await getPlayers();
+      try {
+        const players = await getPlayers();
 
-      onChange(
-        players.map((player) => ({
-          player_id: player.id,
-          nombre: player.nombre,
+        onChange(
+          players.map((player) => ({
+            player_id: player.id,
+            nombre: player.nombre,
+            posicion: player.posicion,
 
-          jugo: true,
+            jugo: true,
 
-          goles: 0,
-          asistencias: 0,
+            recepciones: 0,
+            yardas: 0,
+            touchdowns: 0,
 
-          amarilla: false,
-          roja: false,
+            pases_completos: 0,
+            yardas_pase: 0,
+            touchdowns_pase: 0,
+            touchdowns_carrera: 0,
 
-          mvp: false,
-        }))
-      );
-
-      setLoading(false);
+            tackles: 0,
+            intercepciones: 0,
+            sacks: 0,
+            touchdowns_defensivos: 0,
+          }))
+        );
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     }
 
     if (value.length === 0) {
-      loadPlayers();
+      void loadPlayers();
     } else {
       setLoading(false);
     }
@@ -81,57 +96,106 @@ export default function PlayerMatchList({
   }
 
   if (loading) {
-    return (
-      <p>Cargando jugadores...</p>
-    );
+    return <p>Cargando jugadores...</p>;
   }
 
   return (
     <div className="space-y-6">
-
       {value.map((player, index) => (
         <PlayerMatchCard
           key={player.player_id}
           nombre={player.nombre}
+          posicion={player.posicion}
+
           jugo={player.jugo}
-          goles={player.goles}
-          asistencias={player.asistencias}
-          amarilla={player.amarilla}
-          roja={player.roja}
-          mvp={player.mvp}
+
+          recepciones={player.recepciones}
+          yardas={player.yardas}
+          touchdowns={player.touchdowns}
+
+          pases_completos={player.pases_completos}
+          yardas_pase={player.yardas_pase}
+          touchdowns_pase={player.touchdowns_pase}
+          touchdowns_carrera={player.touchdowns_carrera}
+
+          tackles={player.tackles}
+          intercepciones={player.intercepciones}
+          sacks={player.sacks}
+          touchdowns_defensivos={player.touchdowns_defensivos}
+
           onPlayChange={(v) =>
             updatePlayer(index, {
               jugo: v,
             })
           }
-          onGoalsChange={(v) =>
+
+          onRecepcionesChange={(v) =>
             updatePlayer(index, {
-              goles: v,
+              recepciones: v,
             })
           }
-          onAssistsChange={(v) =>
+
+          onYardasChange={(v) =>
             updatePlayer(index, {
-              asistencias: v,
+              yardas: v,
             })
           }
-          onYellowChange={(v) =>
+
+          onTouchdownsChange={(v) =>
             updatePlayer(index, {
-              amarilla: v,
+              touchdowns: v,
             })
           }
-          onRedChange={(v) =>
+
+          onPasesCompletosChange={(v) =>
             updatePlayer(index, {
-              roja: v,
+              pases_completos: v,
             })
           }
-          onMvpChange={(v) =>
+
+          onYardasPaseChange={(v) =>
             updatePlayer(index, {
-              mvp: v,
+              yardas_pase: v,
+            })
+          }
+
+          onTouchdownsPaseChange={(v) =>
+            updatePlayer(index, {
+              touchdowns_pase: v,
+            })
+          }
+
+          onTouchdownsCarreraChange={(v) =>
+            updatePlayer(index, {
+              touchdowns_carrera: v,
+            })
+          }
+
+          onTacklesChange={(v) =>
+            updatePlayer(index, {
+              tackles: v,
+            })
+          }
+
+          onIntercepcionesChange={(v) =>
+            updatePlayer(index, {
+              intercepciones: v,
+            })
+          }
+
+          onSacksChange={(v) =>
+            updatePlayer(index, {
+              sacks: v,
+            })
+          }
+
+          onTouchdownsDefensivosChange={(v) =>
+            updatePlayer(index, {
+              touchdowns_defensivos: v,
             })
           }
         />
       ))}
-
     </div>
   );
 }

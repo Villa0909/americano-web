@@ -1,98 +1,214 @@
 "use client";
 
+import { PlayerPosition } from "@/types/player";
+
 interface Props {
   nombre: string;
+  posicion: PlayerPosition;
 
   jugo: boolean;
 
-  goles: number;
-  asistencias: number;
+  recepciones: number;
+  yardas: number;
+  touchdowns: number;
 
-  amarilla: boolean;
-  roja: boolean;
+  pases_completos: number;
+  yardas_pase: number;
+  touchdowns_pase: number;
+  touchdowns_carrera: number;
 
-  mvp: boolean;
+  tackles: number;
+  intercepciones: number;
+  sacks: number;
+  touchdowns_defensivos: number;
 
   onPlayChange: (value: boolean) => void;
 
-  onGoalsChange: (value: number) => void;
-  onAssistsChange: (value: number) => void;
+  onRecepcionesChange: (value: number) => void;
+  onYardasChange: (value: number) => void;
+  onTouchdownsChange: (value: number) => void;
 
-  onYellowChange: (value: boolean) => void;
-  onRedChange: (value: boolean) => void;
+  onPasesCompletosChange: (value: number) => void;
+  onYardasPaseChange: (value: number) => void;
+  onTouchdownsPaseChange: (value: number) => void;
+  onTouchdownsCarreraChange: (value: number) => void;
 
-  onMvpChange: (value: boolean) => void;
+  onTacklesChange: (value: number) => void;
+  onIntercepcionesChange: (value: number) => void;
+  onSacksChange: (value: number) => void;
+  onTouchdownsDefensivosChange: (value: number) => void;
 }
 
 export default function PlayerMatchCard({
   nombre,
+  posicion,
 
   jugo,
 
-  goles,
-  asistencias,
+  recepciones,
+  yardas,
+  touchdowns,
 
-  amarilla,
-  roja,
+  pases_completos,
+  yardas_pase,
+  touchdowns_pase,
+  touchdowns_carrera,
 
-  mvp,
+  tackles,
+  intercepciones,
+  sacks,
+  touchdowns_defensivos,
 
   onPlayChange,
 
-  onGoalsChange,
-  onAssistsChange,
+  onRecepcionesChange,
+  onYardasChange,
+  onTouchdownsChange,
 
-  onYellowChange,
-  onRedChange,
+  onPasesCompletosChange,
+  onYardasPaseChange,
+  onTouchdownsPaseChange,
+  onTouchdownsCarreraChange,
 
-  onMvpChange,
+  onTacklesChange,
+  onIntercepcionesChange,
+  onSacksChange,
+  onTouchdownsDefensivosChange,
 }: Props) {
+  const isReceiver =
+    posicion === "Receptor" || posicion === "Corredor";
+
+  const isQuarterback =
+    posicion === "Quarterback";
+
+  const isDLine =
+    posicion === "D-Line";
+
+  const isDefense =
+    posicion === "Linebacker" ||
+    posicion === "Cornerback" ||
+    posicion === "Safety";
+
   return (
     <div className="rounded-2xl border bg-white p-6 shadow">
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-black">
+            {nombre}
+          </h2>
 
-        <h2 className="text-2xl font-black">
-          {nombre}
-        </h2>
+          <p className="mt-1 text-sm font-bold uppercase tracking-wider text-zinc-400">
+            {posicion}
+          </p>
+        </div>
 
         <Switch
           label="Jugó"
           checked={jugo}
           onChange={onPlayChange}
         />
-
       </div>
 
-      <Counter
-        title="Goles"
-        value={goles}
-        onChange={onGoalsChange}
-      />
+      {isReceiver && (
+        <>
+          <Counter
+            title="Recepciones"
+            value={recepciones}
+            onChange={onRecepcionesChange}
+          />
 
-      <Counter
-        title="Asistencias"
-        value={asistencias}
-        onChange={onAssistsChange}
-      />
+          <Counter
+            title="Yardas"
+            value={yardas}
+            onChange={onYardasChange}
+          />
 
-      <Switch
-        label="Amarilla"
-        checked={amarilla}
-        onChange={onYellowChange}
-      />
+          <Counter
+            title="Touchdowns"
+            value={touchdowns}
+            onChange={onTouchdownsChange}
+          />
+        </>
+      )}
 
-      <Switch
-        label="Roja"
-        checked={roja}
-        onChange={onRedChange}
-      />
+      {isQuarterback && (
+        <>
+          <Counter
+            title="Pases completos"
+            value={pases_completos}
+            onChange={onPasesCompletosChange}
+          />
 
-      <Switch
-        label="MVP"
-        checked={mvp}
-        onChange={onMvpChange}
-      />
+          <Counter
+            title="Yardas de pase"
+            value={yardas_pase}
+            onChange={onYardasPaseChange}
+          />
+
+          <Counter
+            title="TD de pase"
+            value={touchdowns_pase}
+            onChange={onTouchdownsPaseChange}
+          />
+
+          <Counter
+            title="TD de carrera"
+            value={touchdowns_carrera}
+            onChange={onTouchdownsCarreraChange}
+          />
+        </>
+      )}
+
+      {isDLine && (
+        <>
+          <Counter
+            title="Tackles"
+            value={tackles}
+            onChange={onTacklesChange}
+          />
+
+          <Counter
+            title="Sacks"
+            value={sacks}
+            onChange={onSacksChange}
+          />
+        </>
+      )}
+
+      {isDefense && (
+        <>
+          <Counter
+            title="Tackles"
+            value={tackles}
+            onChange={onTacklesChange}
+          />
+
+          <Counter
+            title="Intercepciones"
+            value={intercepciones}
+            onChange={onIntercepcionesChange}
+          />
+
+          <Counter
+            title="Sacks"
+            value={sacks}
+            onChange={onSacksChange}
+          />
+
+          <Counter
+            title="TD defensivos"
+            value={touchdowns_defensivos}
+            onChange={onTouchdownsDefensivosChange}
+          />
+        </>
+      )}
+
+      {posicion === "O-Line" && (
+        <p className="rounded-xl bg-zinc-50 p-4 text-sm text-zinc-500">
+          Este jugador no tiene estadísticas individuales registradas.
+        </p>
+      )}
 
     </div>
   );
@@ -108,7 +224,7 @@ function Counter({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="mb-5 flex items-center justify-between">
+    <div className="mb-5 flex items-center justify-between gap-4">
 
       <span className="font-medium">
         {title}
@@ -126,7 +242,7 @@ function Counter({
           -
         </button>
 
-        <span className="w-8 text-center text-lg font-bold">
+        <span className="w-12 text-center text-lg font-bold">
           {value}
         </span>
 
@@ -156,8 +272,7 @@ function Switch({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <label className="mb-4 flex items-center justify-between">
-
+    <label className="flex items-center gap-3">
       <span className="font-medium">
         {label}
       </span>
@@ -179,7 +294,6 @@ function Switch({
           }`}
         />
       </button>
-
     </label>
   );
 }

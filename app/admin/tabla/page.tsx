@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import {
   createStandingMatch,
@@ -512,6 +513,64 @@ export default function AdminTablaPage() {
     <main className="min-h-screen bg-zinc-100 px-4 py-8">
 
       <div className="mx-auto max-w-5xl">
+        <nav className="mb-10 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+  <div className="flex min-w-max">
+    <Link
+      href="/admin"
+      className="
+        border-b-2
+        border-transparent
+        px-5
+        py-4
+        text-sm
+        font-bold
+        text-zinc-500
+        transition
+        hover:border-zinc-300
+        hover:text-black
+        sm:px-7
+      "
+    >
+      👤 Jugadores
+    </Link>
+
+    <Link
+      href="/admin/partidos"
+      className="
+        border-b-2
+        border-transparent
+        px-5
+        py-4
+        text-sm
+        font-bold
+        text-zinc-500
+        transition
+        hover:border-zinc-300
+        hover:text-black
+        sm:px-7
+      "
+    >
+      🏈 Partidos
+    </Link>
+
+    <Link
+      href="/admin/tabla"
+      className="
+        border-b-2
+        border-black
+        px-5
+        py-4
+        text-sm
+        font-black
+        text-black
+        transition
+        sm:px-7
+      "
+    >
+      📊 Tabla
+    </Link>
+  </div>
+</nav>
 
         <div className="mb-8">
 

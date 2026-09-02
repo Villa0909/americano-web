@@ -16,14 +16,17 @@ import {
   updatePlayerMatchStat,
 } from "@/lib/playerMatchStats";
 
-import { refreshPlayerStats } from "@/lib/players";
+import {
+  getPlayers,
+  refreshPlayerStats,
+} from "@/lib/players";
 
 import PlayerMatchList, {
   MatchPlayerStats,
 } from "./PlayerMatchList";
 
 interface FormState {
-    jornada: string;
+  jornada: string;
   rival: string;
   fecha: string;
   torneo: string;
@@ -36,7 +39,7 @@ interface FormState {
 }
 
 const initialForm: FormState = {
-    jornada: "",
+  jornada: "",
   rival: "",
   fecha: "",
   torneo: "",
@@ -48,7 +51,11 @@ const initialForm: FormState = {
   ubicacion_url: "",
 };
 
-export default function MatchForm() {
+interface Props {
+  mode: "add" | "edit";
+}
+
+export default function MatchForm({ mode }: Props) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedId, setSelectedId] =
     useState<number | null>(null);
@@ -88,26 +95,35 @@ export default function MatchForm() {
     setSelectedId(match.id);
 
     setForm({
-        jornada:
-    match.jornada === null
-      ? ""
-      : String(match.jornada),
+      jornada:
+        match.jornada === null
+          ? ""
+          : String(match.jornada),
+
       rival: match.rival,
+
       fecha: formatDateForInput(match.fecha),
+
       torneo: match.torneo ?? "",
+
       goles_favor:
         match.goles_favor === null
           ? ""
           : String(match.goles_favor),
+
       goles_contra:
         match.goles_contra === null
           ? ""
           : String(match.goles_contra),
+
       local: match.local,
+
       escudo_rival:
         match.escudo_rival ?? "",
+
       ubicacion:
         match.ubicacion ?? "",
+
       ubicacion_url:
         match.ubicacion_url ?? "",
     });
@@ -115,48 +131,61 @@ export default function MatchForm() {
     try {
       setLoadingStats(true);
 
-      const stats =
-        await getStatsByMatch(match.id);
+      const [stats, allPlayers] = await Promise.all([
+        getStatsByMatch(match.id),
+        getPlayers(),
+      ]);
 
-      /*
-       * Convertimos las estadísticas de Supabase
-       * al formato que utiliza PlayerMatchList.
-       */
-      const loadedPlayers =
-        stats.map((stat: any) => ({
-          player_id: stat.player_id,
-          nombre: stat.nombre ?? "Jugador",
+      const loadedPlayers: MatchPlayerStats[] =
+        allPlayers.map((player) => {
+          const existing = stats.find(
+            (stat) =>
+              stat.player_id === player.id
+          );
 
-          jugo: stat.jugo,
+          return {
+            player_id: player.id,
+            nombre: player.nombre,
+            posicion: player.posicion,
 
-          goles: stat.goles ?? 0,
-          asistencias:
-            stat.asistencias ?? 0,
+            jugo: existing?.jugo ?? true,
 
-          amarilla:
-            (stat.amarillas ?? 0) > 0,
+            recepciones:
+              existing?.recepciones ?? 0,
 
-          roja:
-            (stat.rojas ?? 0) > 0,
+            yardas:
+              existing?.yardas ?? 0,
 
-          mvp: stat.mvp ?? false,
+            touchdowns:
+              existing?.touchdowns ?? 0,
 
-          /*
-           * Guardamos temporalmente el id de
-           * player_match_stats para saber qué
-           * registro actualizar.
-           */
-          stat_id: stat.id,
-        }));
+            pases_completos:
+              existing?.pases_completos ?? 0,
 
-      /*
-       * Necesitamos los nombres de los jugadores.
-       * getStatsByMatch no los trae.
-       *
-       * Los cargamos desde PlayerMatchList
-       * cuando haga falta.
-       */
-      setPlayers(loadedPlayers as MatchPlayerStats[]);
+            yardas_pase:
+              existing?.yardas_pase ?? 0,
+
+            touchdowns_pase:
+              existing?.touchdowns_pase ?? 0,
+
+            touchdowns_carrera:
+              existing?.touchdowns_carrera ?? 0,
+
+            tackles:
+              existing?.tackles ?? 0,
+
+            intercepciones:
+              existing?.intercepciones ?? 0,
+
+            sacks:
+              existing?.sacks ?? 0,
+
+            touchdowns_defensivos:
+              existing?.touchdowns_defensivos ?? 0,
+          };
+        });
+
+      setPlayers(loadedPlayers);
     } catch (error) {
       console.error(error);
 
@@ -184,19 +213,47 @@ export default function MatchForm() {
     for (const player of players) {
       const existing = existingStats.find(
         (stat) =>
-          stat.player_id ===
-          player.player_id
+          stat.player_id === player.player_id
       );
 
       const statData = {
         match_id: matchId,
         player_id: player.player_id,
+
         jugo: player.jugo,
-        goles: player.goles,
-        asistencias: player.asistencias,
-        amarillas: player.amarilla ? 1 : 0,
-        rojas: player.roja ? 1 : 0,
-        mvp: player.mvp,
+
+        recepciones:
+          player.recepciones,
+
+        yardas:
+          player.yardas,
+
+        touchdowns:
+          player.touchdowns,
+
+        pases_completos:
+          player.pases_completos,
+
+        yardas_pase:
+          player.yardas_pase,
+
+        touchdowns_pase:
+          player.touchdowns_pase,
+
+        touchdowns_carrera:
+          player.touchdowns_carrera,
+
+        tackles:
+          player.tackles,
+
+        intercepciones:
+          player.intercepciones,
+
+        sacks:
+          player.sacks,
+
+        touchdowns_defensivos:
+          player.touchdowns_defensivos,
       };
 
       if (existing) {
@@ -273,23 +330,33 @@ export default function MatchForm() {
     }
 
     const matchData = {
-        jornada:
-    form.jornada === ""
-      ? null
-      : Number(form.jornada),
+      jornada:
+        form.jornada === ""
+          ? null
+          : Number(form.jornada),
+
       rival: form.rival.trim(),
+
       fecha: new Date(
         form.fecha
       ).toISOString(),
+
       torneo: form.torneo.trim(),
+
       goles_favor: golesFavor,
+
       goles_contra: golesContra,
+
       local: form.local,
+
       resultado,
+
       escudo_rival:
         form.escudo_rival.trim() || null,
+
       ubicacion:
         form.ubicacion.trim() || null,
+
       ubicacion_url:
         form.ubicacion_url.trim() || null,
     };
@@ -298,9 +365,6 @@ export default function MatchForm() {
       setLoading(true);
 
       if (selectedId !== null) {
-        /*
-         * EDITAR
-         */
         await updateMatch(
           selectedId,
           matchData
@@ -314,9 +378,6 @@ export default function MatchForm() {
           "Partido y estadísticas actualizados."
         );
       } else {
-        /*
-         * CREAR
-         */
         const match =
           await createMatch(matchData);
 
@@ -330,6 +391,7 @@ export default function MatchForm() {
       }
 
       clearForm();
+
       await loadMatches();
     } catch (error: any) {
       console.error(error);
@@ -373,15 +435,126 @@ export default function MatchForm() {
     }
   }
 
+  /*
+   * ==========================================
+   * MODO EDITAR
+   * ==========================================
+   *
+   * Primero mostramos únicamente los partidos.
+   * El formulario aparece hasta seleccionar uno.
+   */
+
+  if (mode === "edit" && selectedId === null) {
+    return (
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <div className="mb-8">
+          <h2 className="text-2xl font-black">
+            Partidos guardados
+          </h2>
+
+          <p className="mt-1 text-sm text-zinc-500">
+            Selecciona un partido para editarlo.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {matches.length === 0 ? (
+            <p className="rounded-xl bg-zinc-50 px-4 py-8 text-center text-zinc-500">
+              No hay partidos registrados.
+            </p>
+          ) : (
+            matches.map((match) => {
+              const played =
+                match.goles_favor !== null &&
+                match.goles_contra !== null;
+
+              return (
+                <article
+                  key={match.id}
+                  className="
+                    flex flex-col gap-4
+                    rounded-xl border border-zinc-200 p-4
+                    sm:flex-row sm:items-center sm:justify-between
+                  "
+                >
+                  <div>
+                    <p className="text-lg font-black">
+                      Equipo{" "}
+                      {played
+                        ? `${match.goles_favor} - ${match.goles_contra}`
+                        : "vs."}{" "}
+                      {match.rival}
+                    </p>
+
+                    <p className="mt-1 text-sm text-zinc-500">
+                      {new Date(
+                        match.fecha
+                      ).toLocaleString(
+                        "es-MX",
+                        {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        }
+                      )}
+                    </p>
+
+                    <p className="mt-1 text-sm text-zinc-500">
+                      {match.torneo ||
+                        "Sin torneo"}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void loadMatch(match)
+                      }
+                      className="
+                        rounded-lg bg-black
+                        px-4 py-2 text-sm
+                        font-bold text-white
+                      "
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handleDelete(
+                          match.id
+                        )
+                      }
+                      className="
+                        rounded-lg border border-red-300
+                        px-4 py-2 text-sm
+                        font-bold text-red-600
+                      "
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  /*
+   * ==========================================
+   * FORMULARIO
+   * ==========================================
+   */
+
   return (
     <section className="space-y-10">
-
-      {/* FORMULARIO */}
-
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
 
         <div className="mb-8 flex items-center justify-between gap-4">
-
           <div>
             <h2 className="text-2xl font-black">
               {selectedId
@@ -399,31 +572,34 @@ export default function MatchForm() {
             <button
               type="button"
               onClick={clearForm}
-              className="rounded-xl border border-zinc-300 px-4 py-2 text-sm font-bold"
+              className="
+                rounded-xl border border-zinc-300
+                px-4 py-2 text-sm font-bold
+              "
             >
               Cancelar edición
             </button>
           )}
-
         </div>
 
         <form
           onSubmit={handleSubmit}
           className="grid gap-6 md:grid-cols-2"
         >
-<Input
-  label="Jornada"
-  type="number"
-  min="1"
-  placeholder="Ej. 1"
-  value={form.jornada}
-  onChange={(value) =>
-    setForm({
-      ...form,
-      jornada: value,
-    })
-  }
-/>
+          <Input
+            label="Jornada"
+            type="number"
+            min="1"
+            placeholder="Ej. 1"
+            value={form.jornada}
+            onChange={(value) =>
+              setForm({
+                ...form,
+                jornada: value,
+              })
+            }
+          />
+
           <Input
             label="Rival"
             value={form.rival}
@@ -495,7 +671,7 @@ export default function MatchForm() {
           />
 
           <Input
-            label="Goles Martincitas"
+            label="Puntos del equipo"
             type="number"
             min="0"
             value={form.goles_favor}
@@ -508,7 +684,7 @@ export default function MatchForm() {
           />
 
           <Input
-            label="Goles rival"
+            label="Puntos del rival"
             type="number"
             min="0"
             value={form.goles_contra}
@@ -521,7 +697,6 @@ export default function MatchForm() {
           />
 
           <label className="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 md:col-span-2">
-
             <input
               type="checkbox"
               checked={form.local}
@@ -537,7 +712,7 @@ export default function MatchForm() {
 
             <div>
               <p className="font-bold">
-                Martincitas es local
+                El equipo es local
               </p>
 
               <p className="text-sm text-zinc-500">
@@ -545,21 +720,18 @@ export default function MatchForm() {
                 sea de visitante.
               </p>
             </div>
-
           </label>
 
           {/* ESTADÍSTICAS */}
 
           <div className="border-t pt-8 md:col-span-2">
-
             <h2 className="mb-2 text-2xl font-black">
               Estadísticas de jugadores
             </h2>
 
             <p className="mb-6 text-sm text-zinc-500">
-              {selectedId
-                ? "Modifica las estadísticas de este partido."
-                : "Agrega las estadísticas del partido."}
+              Registra las estadísticas
+              individuales del partido.
             </p>
 
             {loadingStats ? (
@@ -572,7 +744,6 @@ export default function MatchForm() {
                 onChange={setPlayers}
               />
             )}
-
           </div>
 
           <button
@@ -580,7 +751,12 @@ export default function MatchForm() {
             disabled={
               loading || loadingStats
             }
-            className="rounded-xl bg-black px-6 py-3 font-bold text-white disabled:opacity-50 md:col-span-2"
+            className="
+              rounded-xl bg-black
+              px-6 py-3 font-bold
+              text-white disabled:opacity-50
+              md:col-span-2
+            "
           >
             {loading
               ? "Guardando..."
@@ -588,100 +764,8 @@ export default function MatchForm() {
                 ? "Actualizar partido"
                 : "Crear partido"}
           </button>
-
         </form>
       </div>
-
-      {/* PARTIDOS GUARDADOS */}
-
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-
-        <h2 className="text-2xl font-black">
-          Partidos guardados
-        </h2>
-
-        <div className="mt-6 space-y-3">
-
-          {matches.length === 0 ? (
-            <p className="rounded-xl bg-zinc-50 px-4 py-8 text-center text-zinc-500">
-              No hay partidos registrados.
-            </p>
-          ) : (
-            matches.map((match) => {
-
-              const played =
-                match.goles_favor !== null &&
-                match.goles_contra !== null;
-
-              return (
-                <article
-                  key={match.id}
-                  className="flex flex-col gap-4 rounded-xl border border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-
-                  <div>
-
-                    <p className="text-lg font-black">
-                      Martincitas{" "}
-                      {played
-                        ? `${match.goles_favor} - ${match.goles_contra}`
-                        : "vs."}{" "}
-                      {match.rival}
-                    </p>
-
-                    <p className="mt-1 text-sm text-zinc-500">
-                      {new Date(
-                        match.fecha
-                      ).toLocaleString(
-                        "es-MX",
-                        {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        }
-                      )}
-                    </p>
-
-                    <p className="mt-1 text-sm text-zinc-500">
-                      {match.torneo ||
-                        "Sin torneo"}
-                    </p>
-
-                  </div>
-
-                  <div className="flex gap-2">
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        void loadMatch(match)
-                      }
-                      className="rounded-lg bg-black px-4 py-2 text-sm font-bold text-white"
-                    >
-                      Editar
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        void handleDelete(
-                          match.id
-                        )
-                      }
-                      className="rounded-lg border border-red-300 px-4 py-2 text-sm font-bold text-red-600"
-                    >
-                      Eliminar
-                    </button>
-
-                  </div>
-
-                </article>
-              );
-            })
-          )}
-
-        </div>
-      </div>
-
     </section>
   );
 }
@@ -703,7 +787,6 @@ function Input({
 }) {
   return (
     <div>
-
       <label className="mb-2 block font-semibold">
         {label}
       </label>
@@ -716,9 +799,12 @@ function Input({
         onChange={(event) =>
           onChange(event.target.value)
         }
-        className="w-full rounded-xl border border-zinc-300 bg-white p-3 text-black outline-none focus:border-black"
+        className="
+          w-full rounded-xl border border-zinc-300
+          bg-white p-3 text-black outline-none
+          focus:border-black
+        "
       />
-
     </div>
   );
 }

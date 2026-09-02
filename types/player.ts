@@ -1,3 +1,13 @@
+export type PlayerPosition =
+  | "O-Line"
+  | "Receptor"
+  | "Corredor"
+  | "Quarterback"
+  | "D-Line"
+  | "Linebacker"
+  | "Cornerback"
+  | "Safety";
+
 export interface Player {
   id: string;
 
@@ -5,24 +15,9 @@ export interface Player {
   slug: string;
   numero: number;
 
-  posicion:
-    | "Portero"
-    | "Defensa"
-    | "Mediocampista"
-    | "Delantero";
+  posicion: PlayerPosition;
 
   foto: string;
-
-  goles: number;
-  asistencias: number;
-  partidos: number;
-  mvps: number;
-
-  /*
-   * Solo se utiliza para porteros.
-   * Los demás jugadores tendrán 0.
-   */
-  porterias_cero: number;
 
   edad: number;
   altura: number;
@@ -33,4 +28,30 @@ export interface Player {
     | "Izquierdo";
 
   descripcion: string;
+
+  /*
+   * =========================
+   * ESTADÍSTICAS DE OFFENSE
+   * =========================
+   */
+
+  recepciones: number;
+  yardas: number;
+  touchdowns: number;
+
+  pases_completos: number;
+  yardas_pase: number;
+  touchdowns_pase: number;
+  touchdowns_carrera: number;
+
+  /*
+   * =========================
+   * ESTADÍSTICAS DE DEFENSE
+   * =========================
+   */
+
+  tackles: number;
+  intercepciones: number;
+  sacks: number;
+  touchdowns_defensivos: number;
 }

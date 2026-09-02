@@ -6,15 +6,16 @@ import {
   ChevronRight,
   MapPin,
   Medal,
+  Shield,
   Trophy,
 } from "lucide-react";
 
-import { PiSoccerBallFill } from "react-icons/pi";
-
 import { getMatches } from "@/lib/matches";
 import { getPlayers } from "@/lib/players";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
 const TIME_ZONE = "America/Mexico_City";
 
 export default async function Home() {
@@ -36,7 +37,8 @@ export default async function Home() {
       (match) =>
         match.goles_favor === null &&
         match.goles_contra === null &&
-        new Date(match.fecha).getTime() >= now.getTime(),
+        new Date(match.fecha).getTime() >=
+          now.getTime(),
     )
     .sort(
       (a, b) =>
@@ -66,7 +68,7 @@ export default async function Home() {
       Number(match.goles_contra),
   ).length;
 
-  const goalsFor = playedMatches.reduce(
+  const pointsFor = playedMatches.reduce(
     (total, match) =>
       total + Number(match.goles_favor ?? 0),
     0,
@@ -85,57 +87,73 @@ export default async function Home() {
         )
       : 0;
 
-  const topScorers = [...players]
-    .filter(
-      (player) =>
-        Number(player.goles ?? 0) > 0,
-    )
+  const topPlayers = [...players]
     .sort(
       (a, b) =>
-        Number(b.goles ?? 0) -
-        Number(a.goles ?? 0),
+        getPlayerImpact(b) -
+        getPlayerImpact(a),
     )
     .slice(0, 4);
 
   return (
-    <main className="min-h-screen bg-white text-black">
-      {/* Próximo partido */}
+    <main className="min-h-screen bg-[#062A63] text-white">
 
-      <section className="relative overflow-hidden bg-black text-white">
-        <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_2px,transparent_2px,transparent_18px)]" />
+      {/* HERO / PRÓXIMO PARTIDO */}
 
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+      <section className="relative overflow-hidden bg-[#031B42]">
+        <div className="absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,214,0,0.04)_0px,rgba(255,214,0,0.04)_2px,transparent_2px,transparent_18px)]" />
+
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
           <div className="mx-auto max-w-5xl text-center">
-            <p className="text-xs font-black uppercase tracking-[4px] text-zinc-400 sm:text-sm">
+
+            <div className="mx-auto mb-5 flex h-28 w-28 items-center justify-center sm:h-36 sm:w-36">
+  <Image
+    src="/logo.png"
+    alt="Caballeros"
+    width={144}
+    height={144}
+    priority
+    className="object-contain"
+  />
+</div>
+
+            <p className="text-xs font-black uppercase tracking-[4px] text-yellow-300 sm:text-sm">
               Sitio oficial
             </p>
 
-            <h1 className="mt-3 text-4xl font-black uppercase tracking-tight sm:text-6xl lg:text-7xl">
-              Martincitas C.F.
+            <h1 className="mt-3 text-5xl font-black uppercase tracking-tight text-yellow-400 sm:text-7xl lg:text-8xl">
+              Caballeros
             </h1>
 
-            <div className="mx-auto mt-8 h-px w-24 bg-zinc-700" />
+            <p className="mt-3 text-sm font-bold uppercase tracking-[3px] text-blue-200 sm:text-base">
+              Fútbol Americano
+            </p>
+
+            <div className="mx-auto mt-8 h-1 w-20 rounded-full bg-yellow-400" />
 
             {nextMatch ? (
               <>
-                <p className="mt-8 text-xs font-black uppercase tracking-[4px] text-zinc-400 sm:text-sm">
+                <p className="mt-10 text-xs font-black uppercase tracking-[4px] text-yellow-300 sm:text-sm">
                   Próximo partido
                 </p>
 
-                <p className="mt-3 text-sm font-bold uppercase tracking-[2px] text-zinc-300">
-                  Jornada {nextMatch.id} ·{" "}
+                <p className="mt-3 text-sm font-bold uppercase tracking-[2px] text-blue-100">
+                  Jornada {nextMatch.jornada ??
+                    nextMatch.id}{" "}
+                  ·{" "}
                   {nextMatch.torneo ||
                     "Sin torneo"}
                 </p>
 
                 <div className="mx-auto mt-9 grid max-w-4xl grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-8">
-                  {/* Martincitas */}
+
+                  {/* CABALLEROS */}
 
                   <div className="flex min-w-0 flex-col items-center">
                     <div className="relative h-20 w-20 sm:h-32 sm:w-32">
                       <Image
                         src="/logo.png"
-                        alt="Martincitas"
+                        alt="Caballeros"
                         fill
                         priority
                         sizes="128px"
@@ -143,15 +161,15 @@ export default async function Home() {
                       />
                     </div>
 
-                    <p className="mt-4 max-w-full truncate text-sm font-black uppercase sm:text-2xl">
-                      Martincitas
+                    <p className="mt-4 max-w-full truncate text-sm font-black uppercase text-white sm:text-2xl">
+                      Caballeros
                     </p>
                   </div>
 
-                  {/* Hora */}
+                  {/* HORA */}
 
                   <div className="flex min-w-[100px] flex-col items-center sm:min-w-[180px]">
-                    <p className="whitespace-nowrap text-3xl font-black sm:text-5xl">
+                    <p className="whitespace-nowrap text-3xl font-black text-yellow-400 sm:text-5xl">
                       {new Date(
                         nextMatch.fecha,
                       ).toLocaleTimeString(
@@ -159,17 +177,18 @@ export default async function Home() {
                         {
                           hour: "numeric",
                           minute: "2-digit",
-                          timeZone: TIME_ZONE,
+                          timeZone:
+                            TIME_ZONE,
                         },
                       )}
                     </p>
 
-                    <span className="mt-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[1px] text-zinc-200 sm:text-xs">
+                    <span className="mt-3 rounded-full border border-yellow-400/30 bg-yellow-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[1px] text-yellow-200 sm:text-xs">
                       Próximo partido
                     </span>
                   </div>
 
-                  {/* Rival */}
+                  {/* RIVAL */}
 
                   <div className="flex min-w-0 flex-col items-center">
                     <div className="relative h-20 w-20 sm:h-32 sm:w-32">
@@ -186,16 +205,17 @@ export default async function Home() {
                       />
                     </div>
 
-                    <p className="mt-4 max-w-full truncate text-sm font-black uppercase sm:text-2xl">
+                    <p className="mt-4 max-w-full truncate text-sm font-black uppercase text-white sm:text-2xl">
                       {nextMatch.rival}
                     </p>
                   </div>
                 </div>
 
-                {/* Fecha y ubicación */}
+                {/* FECHA Y UBICACIÓN */}
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
+
+                  <div className="flex items-center gap-2 text-sm font-semibold text-blue-100">
                     <CalendarDays size={17} />
 
                     <span className="capitalize">
@@ -204,45 +224,56 @@ export default async function Home() {
                       ).toLocaleDateString(
                         "es-MX",
                         {
-                          weekday: "long",
+                          weekday:
+                            "long",
                           day: "numeric",
                           month: "long",
-                          timeZone: TIME_ZONE,
+                          timeZone:
+                            TIME_ZONE,
                         },
                       )}
                     </span>
                   </div>
 
                   {nextMatch.ubicacion && (
-                    <div className="hidden h-4 w-px bg-zinc-700 sm:block" />
+                    <div className="hidden h-4 w-px bg-blue-700 sm:block" />
                   )}
 
                   {nextMatch.ubicacion && (
-                    <div className="flex items-center gap-2 text-sm font-semibold text-zinc-300">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-blue-100">
                       <MapPin size={17} />
 
                       <span>
-                        {nextMatch.ubicacion}
+                        {
+                          nextMatch.ubicacion
+                        }
                       </span>
                     </div>
                   )}
                 </div>
 
+                {/* BOTONES */}
+
                 <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+
                   <Link
                     href={`/resultados/${nextMatch.id}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-black uppercase tracking-wide text-black transition hover:bg-zinc-200"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-6 py-3 text-sm font-black uppercase tracking-wide text-[#031B42] transition hover:bg-yellow-300"
                   >
                     Ver partido
-                    <ChevronRight size={18} />
+                    <ChevronRight
+                      size={18}
+                    />
                   </Link>
 
                   {nextMatch.ubicacion_url && (
                     <a
-                      href={nextMatch.ubicacion_url}
+                      href={
+                        nextMatch.ubicacion_url
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 px-6 py-3 text-sm font-black uppercase tracking-wide text-white transition hover:bg-white/10"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-yellow-400/50 px-6 py-3 text-sm font-black uppercase tracking-wide text-yellow-300 transition hover:bg-yellow-400/10"
                     >
                       <MapPin size={18} />
                       Ubicación
@@ -251,14 +282,20 @@ export default async function Home() {
                 </div>
               </>
             ) : (
-              <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-zinc-700 bg-white/5 px-6 py-10">
-                <p className="text-xl font-black uppercase">
+              <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-blue-700 bg-blue-900/40 px-6 py-10">
+                <Shield
+                  size={38}
+                  className="mx-auto text-yellow-400"
+                />
+
+                <p className="mt-4 text-xl font-black uppercase text-yellow-400">
                   No hay próximo partido
                 </p>
 
-                <p className="mt-2 text-sm text-zinc-400">
-                  El siguiente encuentro aparecerá
-                  aquí cuando sea registrado.
+                <p className="mt-2 text-sm text-blue-200">
+                  El siguiente encuentro
+                  aparecerá aquí cuando
+                  sea registrado.
                 </p>
               </div>
             )}
@@ -267,13 +304,17 @@ export default async function Home() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        {/* Números rápidos */}
+
+        {/* NÚMEROS RÁPIDOS */}
 
         <section>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
+
             <QuickStat
               title="Partidos"
-              value={playedMatches.length}
+              value={
+                playedMatches.length
+              }
             />
 
             <QuickStat
@@ -282,203 +323,279 @@ export default async function Home() {
             />
 
             <QuickStat
-              title="Goles"
-              value={goalsFor}
+              title="Puntos"
+              value={pointsFor}
             />
 
             <QuickStat
               title="Efectividad"
               value={`${effectiveness}%`}
             />
+
           </div>
         </section>
 
-        {/* Resultados */}
+        {/* RESULTADOS */}
 
         <section className="mt-16 sm:mt-20">
+
           <SectionTitle
-            title="Últimos resultados"
+            title="Últimos partidos"
             href="/resultados"
             linkText="Ver todos"
           />
 
           {recentMatches.length > 0 ? (
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              {recentMatches.map((match) => {
-                const result =
-                  Number(match.goles_favor) >
-                  Number(match.goles_contra)
-                    ? "Victoria"
-                    : Number(match.goles_favor) <
-                        Number(match.goles_contra)
-                      ? "Derrota"
-                      : "Empate";
 
-                const resultStyle =
-                  result === "Victoria"
-                    ? "bg-green-600"
-                    : result === "Derrota"
-                      ? "bg-red-600"
-                      : "bg-zinc-500";
+              {recentMatches.map(
+                (match) => {
 
-                return (
-                  <Link
-                    key={match.id}
-                    href={`/resultados/${match.id}`}
-                    className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
-                      <p className="text-xs font-bold uppercase tracking-[2px] text-zinc-500">
-                        Jornada {match.id}
-                      </p>
+                  const result =
+                    Number(
+                      match.goles_favor,
+                    ) >
+                    Number(
+                      match.goles_contra,
+                    )
+                      ? "Victoria"
+                      : Number(
+                            match.goles_favor,
+                          ) <
+                          Number(
+                            match.goles_contra,
+                          )
+                        ? "Derrota"
+                        : "Empate";
 
-                      <span
-                        className={`rounded-full px-3 py-1 text-[10px] font-black uppercase text-white ${resultStyle}`}
-                      >
-                        {result}
-                      </span>
-                    </div>
+                  const resultStyle =
+                    result === "Victoria"
+                      ? "bg-green-600"
+                      : result ===
+                          "Derrota"
+                        ? "bg-red-600"
+                        : "bg-zinc-500";
 
-                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-7">
-                      <div className="flex flex-col items-center">
-                        <div className="relative h-14 w-14">
-                          <Image
-                            src="/logo.png"
-                            alt="Martincitas"
-                            fill
-                            sizes="56px"
-                            className="scale-110 object-contain"
-                          />
-                        </div>
+                  return (
+                    <Link
+                      key={match.id}
+                      href={`/resultados/${match.id}`}
+                      className="group overflow-hidden rounded-2xl border border-blue-700 bg-[#0B3B82] shadow-sm transition hover:-translate-y-1 hover:border-yellow-400 hover:shadow-lg"
+                    >
 
-                        <p className="mt-2 text-center text-xs font-black uppercase">
-                          Martincitas
+                      <div className="flex items-center justify-between border-b border-blue-700 px-5 py-4">
+
+                        <p className="text-xs font-bold uppercase tracking-[2px] text-blue-200">
+                          Jornada{" "}
+                          {match.jornada ??
+                            match.id}
                         </p>
+
+                        <span
+                          className={`rounded-full px-3 py-1 text-[10px] font-black uppercase text-white ${resultStyle}`}
+                        >
+                          {result}
+                        </span>
+
                       </div>
 
-                      <p className="whitespace-nowrap text-3xl font-black">
-                        {match.goles_favor} -{" "}
-                        {match.goles_contra}
-                      </p>
+                      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-7">
 
-                      <div className="flex min-w-0 flex-col items-center">
-                        <div className="relative h-14 w-14">
-                          <Image
-                            src={
-                              match.escudo_rival
-                                ? `/escudos/${match.escudo_rival}`
-                                : "/logo.png"
+                        {/* CABALLEROS */}
+
+                        <div className="flex flex-col items-center">
+
+                          <div className="relative h-14 w-14">
+                            <Image
+                              src="/logo.png"
+                              alt="Caballeros"
+                              fill
+                              sizes="56px"
+                              className="scale-110 object-contain"
+                            />
+                          </div>
+
+                          <p className="mt-2 text-center text-xs font-black uppercase text-white">
+                            Caballeros
+                          </p>
+
+                        </div>
+
+                        {/* MARCADOR */}
+
+                        <p className="whitespace-nowrap text-3xl font-black text-yellow-400">
+                          {
+                            match.goles_favor
+                          }{" "}
+                          -{" "}
+                          {
+                            match.goles_contra
+                          }
+                        </p>
+
+                        {/* RIVAL */}
+
+                        <div className="flex min-w-0 flex-col items-center">
+
+                          <div className="relative h-14 w-14">
+                            <Image
+                              src={
+                                match.escudo_rival
+                                  ? `/escudos/${match.escudo_rival}`
+                                  : "/logo.png"
+                              }
+                              alt={
+                                match.rival
+                              }
+                              fill
+                              sizes="56px"
+                              className="object-contain"
+                            />
+                          </div>
+
+                          <p className="mt-2 max-w-full truncate text-center text-xs font-black uppercase text-white">
+                            {
+                              match.rival
                             }
-                            alt={match.rival}
-                            fill
-                            sizes="56px"
-                            className="object-contain"
-                          />
+                          </p>
+
                         </div>
 
-                        <p className="mt-2 max-w-full truncate text-center text-xs font-black uppercase">
-                          {match.rival}
-                        </p>
                       </div>
-                    </div>
 
-                    <div className="border-t border-zinc-100 px-5 py-3 text-center text-xs font-medium capitalize text-zinc-500">
-                      {new Date(
-                        match.fecha,
-                      ).toLocaleDateString(
-                        "es-MX",
-                        {
-                          day: "numeric",
-                          month: "long",
-                          timeZone: TIME_ZONE,
-                        },
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+                      <div className="border-t border-blue-700 px-5 py-3 text-center text-xs font-medium capitalize text-blue-200">
+                        {new Date(
+                          match.fecha,
+                        ).toLocaleDateString(
+                          "es-MX",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            timeZone:
+                              TIME_ZONE,
+                          },
+                        )}
+                      </div>
+
+                    </Link>
+                  );
+                },
+              )}
+
             </div>
           ) : (
-            <EmptyState text="No hay resultados registrados." />
+            <EmptyState text="No hay partidos registrados." />
           )}
         </section>
 
-        {/* Goleadores */}
+        {/* LÍDERES DEL EQUIPO */}
 
         <section className="mt-16 sm:mt-20">
+
           <SectionTitle
-            title="Top goleadores"
+            title="Líderes del equipo"
             href="/estadisticas"
             linkText="Ver estadísticas"
           />
 
-          {topScorers.length > 0 ? (
-            <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              {topScorers.map(
+          {topPlayers.length > 0 ? (
+            <div className="mt-6 overflow-hidden rounded-2xl border border-blue-700 bg-[#0B3B82] shadow-sm">
+
+              {topPlayers.map(
                 (player, index) => (
                   <Link
                     key={player.id}
                     href={`/plantilla/${player.slug}`}
-                    className="grid grid-cols-[42px_58px_1fr_auto] items-center gap-3 border-b border-zinc-100 px-4 py-4 transition last:border-0 hover:bg-zinc-50 sm:grid-cols-[50px_68px_1fr_auto] sm:px-6"
+                    className="grid grid-cols-[42px_58px_1fr_auto] items-center gap-3 border-b border-blue-700 px-4 py-4 transition last:border-0 hover:bg-[#104A9D] sm:grid-cols-[50px_68px_1fr_auto] sm:px-6"
                   >
+
+                    {/* POSICIÓN */}
+
                     <div
                       className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-black ${
                         index === 0
-                          ? "bg-yellow-400 text-black"
+                          ? "bg-yellow-400 text-[#031B42]"
                           : index === 1
-                            ? "bg-zinc-400 text-white"
+                            ? "bg-blue-300 text-[#031B42]"
                             : index === 2
-                              ? "bg-amber-700 text-white"
-                              : "bg-zinc-100 text-zinc-500"
+                              ? "bg-yellow-700 text-white"
+                              : "bg-blue-800 text-blue-200"
                       }`}
                     >
                       {index + 1}
                     </div>
 
-                    <div className="relative h-14 w-14 overflow-hidden rounded-full bg-zinc-100 sm:h-16 sm:w-16">
+                    {/* FOTO */}
+
+                    <div className="relative h-14 w-14 overflow-hidden rounded-full bg-blue-900 sm:h-16 sm:w-16">
                       <Image
-                        src={getMvpPhoto(
+                        src={getPlayerPhoto(
                           player.nombre,
                         )}
-                        alt={player.nombre}
+                        alt={
+                          player.nombre
+                        }
                         fill
                         sizes="64px"
                         className="object-cover"
                       />
                     </div>
 
+                    {/* INFORMACIÓN */}
+
                     <div className="min-w-0">
-                      <p className="truncate text-base font-black uppercase sm:text-lg">
-                        {player.nombre}
+
+                      <p className="truncate text-base font-black uppercase text-white sm:text-lg">
+                        {
+                          player.nombre
+                        }
                       </p>
 
-                      <p className="mt-1 truncate text-xs text-zinc-500 sm:text-sm">
-                        #{player.numero} ·{" "}
-                        {player.posicion}
+                      <p className="mt-1 truncate text-xs text-blue-200 sm:text-sm">
+                        #
+                        {
+                          player.numero
+                        }{" "}
+                        ·{" "}
+                        {
+                          player.posicion
+                        }
                       </p>
+
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <PiSoccerBallFill
-                        size={25}
-                      />
+                    {/* ESTADÍSTICA PRINCIPAL */}
 
-                      <span className="text-3xl font-black">
-                        {player.goles}
-                      </span>
+                    <div className="text-right">
+
+                      <p className="text-2xl font-black text-yellow-400">
+                        {
+                          getPlayerImpact(
+                            player,
+                          )
+                        }
+                      </p>
+
+                      <p className="text-[9px] font-bold uppercase tracking-wide text-blue-200">
+                        IMPACTO
+                      </p>
+
                     </div>
+
                   </Link>
                 ),
               )}
+
             </div>
           ) : (
-            <EmptyState text="Todavía no hay goleadores registrados." />
+            <EmptyState text="Todavía no hay estadísticas registradas." />
           )}
         </section>
 
-        {/* Accesos */}
+        {/* ACCESOS */}
 
         <section className="mt-16 grid gap-4 sm:mt-20 sm:grid-cols-2">
+
           <HomeLink
             href="/plantilla"
             title="Conoce la plantilla"
@@ -489,9 +606,10 @@ export default async function Home() {
           <HomeLink
             href="/estadisticas"
             title="Estadísticas"
-            text="Líderes individuales y números generales del club."
+            text="Líderes individuales y números generales de Caballeros."
             icon={<Trophy size={28} />}
           />
+
         </section>
       </div>
     </main>
@@ -506,14 +624,16 @@ function QuickStat({
   value: number | string;
 }) {
   return (
-    <article className="rounded-2xl border border-zinc-200 bg-white px-4 py-6 text-center shadow-sm sm:px-6 sm:py-7">
-      <p className="text-3xl font-black sm:text-5xl">
+    <article className="rounded-2xl border border-blue-700 bg-[#0B3B82] px-4 py-6 text-center shadow-sm transition hover:border-yellow-400 sm:px-6 sm:py-7">
+
+      <p className="text-3xl font-black text-yellow-400 sm:text-5xl">
         {value}
       </p>
 
-      <p className="mt-2 text-[10px] font-black uppercase tracking-[2px] text-zinc-500 sm:text-xs">
+      <p className="mt-2 text-[10px] font-black uppercase tracking-[2px] text-blue-200 sm:text-xs">
         {title}
       </p>
+
     </article>
   );
 }
@@ -529,17 +649,19 @@ function SectionTitle({
 }) {
   return (
     <div className="flex items-end justify-between gap-4">
-      <h2 className="text-2xl font-black uppercase tracking-tight sm:text-4xl">
+
+      <h2 className="text-2xl font-black uppercase tracking-tight text-yellow-400 sm:text-4xl">
         {title}
       </h2>
 
       <Link
         href={href}
-        className="flex shrink-0 items-center gap-1 text-xs font-black uppercase tracking-wide text-zinc-500 transition hover:text-black sm:text-sm"
+        className="flex shrink-0 items-center gap-1 text-xs font-black uppercase tracking-wide text-blue-200 transition hover:text-yellow-400 sm:text-sm"
       >
         {linkText}
         <ChevronRight size={17} />
       </Link>
+
     </div>
   );
 }
@@ -550,7 +672,7 @@ function EmptyState({
   text: string;
 }) {
   return (
-    <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 px-6 py-12 text-center text-zinc-500">
+    <div className="mt-6 rounded-2xl border border-blue-700 bg-[#0B3B82] px-6 py-12 text-center text-blue-200">
       {text}
     </div>
   );
@@ -570,26 +692,78 @@ function HomeLink({
   return (
     <Link
       href={href}
-      className="group flex items-center justify-between gap-5 rounded-2xl bg-black p-6 text-white transition hover:-translate-y-1 hover:shadow-xl sm:p-8"
+      className="group flex items-center justify-between gap-5 rounded-2xl bg-yellow-400 p-6 text-[#031B42] transition hover:-translate-y-1 hover:bg-yellow-300 hover:shadow-xl sm:p-8"
     >
+
       <div>
+
         <p className="text-xl font-black uppercase sm:text-2xl">
           {title}
         </p>
 
-        <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-400">
+        <p className="mt-2 max-w-sm text-sm leading-6 text-[#17447D]">
           {text}
         </p>
+
       </div>
 
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-zinc-700 transition group-hover:bg-white group-hover:text-black">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-[#17447D] transition group-hover:bg-[#031B42] group-hover:text-yellow-400">
         {icon}
       </div>
+
     </Link>
   );
 }
 
-function getMvpPhoto(nombre: string) {
+function getPlayerImpact(player: any) {
+  const position = player.posicion;
+
+  if (
+    position === "Receptor" ||
+    position === "Corredor"
+  ) {
+    return (
+      Number(player.touchdowns ?? 0) * 10 +
+      Number(player.yardas ?? 0) +
+      Number(player.recepciones ?? 0) * 2
+    );
+  }
+
+  if (position === "Quarterback") {
+    return (
+      Number(
+        player.touchdowns_pase ?? 0,
+      ) * 10 +
+      Number(
+        player.touchdowns_carrera ?? 0,
+      ) * 10 +
+      Number(
+        player.pases_completos ?? 0,
+      ) * 2 +
+      Number(player.yardas_pase ?? 0)
+    );
+  }
+
+  if (position === "D-Line") {
+    return (
+      Number(player.sacks ?? 0) * 10 +
+      Number(player.tackles ?? 0)
+    );
+  }
+
+  return (
+    Number(player.tackles ?? 0) +
+    Number(
+      player.intercepciones ?? 0,
+    ) * 10 +
+    Number(player.sacks ?? 0) * 10 +
+    Number(
+      player.touchdowns_defensivos ?? 0,
+    ) * 10
+  );
+}
+
+function getPlayerPhoto(nombre: string) {
   const fileName = nombre
     .trim()
     .toLowerCase()

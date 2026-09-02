@@ -68,16 +68,16 @@ export default async function ResultadosPage() {
     );
 
   return (
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#062A63] text-white">
 
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
 
-        <h1 className="mb-10 text-center text-4xl font-black tracking-wide sm:text-5xl">
+        <h1 className="mb-10 text-center text-4xl font-black tracking-wide text-yellow-400 sm:text-5xl">
           PARTIDOS
         </h1>
 
         {groups.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-200 bg-white py-16 text-center text-zinc-500 shadow-sm">
+          <div className="rounded-2xl border border-yellow-400/30 bg-[#0B3B82] py-16 text-center text-blue-100 shadow-sm">
             No hay partidos registrados.
           </div>
         ) : (
@@ -110,7 +110,7 @@ export default async function ResultadosPage() {
 
                 {/* PC */}
 
-                <div className="hidden overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow md:block">
+                <div className="hidden overflow-hidden rounded-2xl border border-[#17447D] bg-[#0B3B82] shadow md:block">
 
                   {group.matches.map(
                     (match) => (

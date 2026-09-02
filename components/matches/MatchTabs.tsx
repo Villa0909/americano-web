@@ -39,7 +39,7 @@ export default function MatchTabs(
 
       {/* PESTAÑAS */}
 
-      <div className="grid grid-cols-3 border-b border-zinc-200">
+      <div className="grid grid-cols-3 border-b border-yellow-400/30">
 
         <Tab
           active={tab === "resumen"}
@@ -74,7 +74,7 @@ export default function MatchTabs(
 
       <div
         key={tab}
-        className="mt-6 text-zinc-900 animate-[positionAppear_250ms_ease-out] sm:mt-8"
+        className="mt-6 text-white animate-[positionAppear_250ms_ease-out] sm:mt-8"
       >
 
         {tab === "resumen" && (
@@ -116,8 +116,8 @@ function Tab({
       onClick={onClick}
       className={`relative min-w-0 px-1 py-4 text-sm font-semibold transition sm:px-6 sm:text-lg ${
         active
-          ? "text-black"
-          : "text-zinc-600 hover:text-black"
+          ? "text-yellow-400"
+          : "text-blue-200 hover:text-yellow-400"
       }`}
     >
       <span className="block truncate">
@@ -125,7 +125,7 @@ function Tab({
       </span>
 
       <span
-        className={`absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 bg-black transition-all duration-300 ${
+        className={`absolute bottom-0 left-1/2 h-[3px] -translate-x-1/2 bg-yellow-400 transition-all duration-300 ${
           active
             ? "w-full opacity-100"
             : "w-0 opacity-0"
