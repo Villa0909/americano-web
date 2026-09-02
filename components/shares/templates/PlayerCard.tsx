@@ -1,13 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
-
 import PlayerStats from "../ui/PlayerStats";
-
-import { PiSoccerBallFill } from "react-icons/pi";
 
 import {
   CalendarDays,
   ShieldCheck,
-  SportShoe,
   Star,
 } from "lucide-react";
 
@@ -17,19 +12,21 @@ interface Props {
   foto: string;
 
   posicion:
-    | "Portero"
-    | "Defensa"
-    | "Mediocampista"
-    | "Delantero";
+    | "O-Line"
+    | "Receptor"
+    | "Corredor"
+    | "Quarterback"
+    | "D-Line"
+    | "Linebacker"
+    | "Cornerback"
+    | "Safety";
 
-  partidos: number;
-  goles: number;
-  asistencias: number;
-  mvps: number;
-  porteriasCero: number;
+  partidos?: number;
+  goles?: number;
+  asistencias?: number;
+  mvps?: number;
+  porteriasCero?: number;
 }
-
-/* FOTO */
 
 const PHOTO = {
   x: -300,
@@ -40,8 +37,6 @@ const PHOTO = {
   rotate: 0,
 };
 
-/* NOMBRE */
-
 const NAME = {
   x: 670,
   y: 180,
@@ -49,8 +44,6 @@ const NAME = {
   opacity: 1,
   rotate: 0,
 };
-
-/* POSICIÓN */
 
 const POSITION = {
   x: 50,
@@ -60,8 +53,6 @@ const POSITION = {
   rotate: 0,
 };
 
-/* DORSAL */
-
 const NUMBER = {
   x: 260,
   y: 400,
@@ -70,16 +61,12 @@ const NUMBER = {
   rotate: 0,
 };
 
-/* LUZ */
-
 const LIGHT = {
   x: 540,
   y: 180,
   size: 520,
   opacity: 0,
 };
-
-/* ESTADÍSTICAS */
 
 const STATS = {
   x: 550,
@@ -88,8 +75,6 @@ const STATS = {
   yDouble: 180,
   opacity: 1,
 };
-
-/* FOOTER */
 
 const FOOTER = {
   x: 700,
@@ -103,21 +88,23 @@ export default function PlayerCard({
   numero,
   foto,
   posicion,
-  partidos,
-  goles,
-  asistencias,
-  mvps,
-  porteriasCero,
 }: Props) {
   const numberRight =
     numero < 10 ? 320 : NUMBER.x;
 
-  const positionText = {
-    Portero: "POR",
-    Defensa: "DEF",
-    Mediocampista: "MED",
-    Delantero: "DEL",
-  } as const;
+  const positionText: Record<
+    Props["posicion"],
+    string
+  > = {
+    "O-Line": "OL",
+    Receptor: "WR",
+    Corredor: "RB",
+    Quarterback: "QB",
+    "D-Line": "DL",
+    Linebacker: "LB",
+    Cornerback: "CB",
+    Safety: "S",
+  };
 
   const posicionAbreviada =
     positionText[posicion];
@@ -130,27 +117,7 @@ export default function PlayerCard({
           className="text-white"
         />
       ),
-      value: Number(partidos ?? 0),
-    },
-
-    {
-      icon: (
-        <PiSoccerBallFill
-          size={100}
-          className="text-white"
-        />
-      ),
-      value: Number(goles ?? 0),
-    },
-
-    {
-      icon: (
-        <SportShoe
-          size={100}
-          className="text-white"
-        />
-      ),
-      value: Number(asistencias ?? 0),
+      value: 0,
     },
 
     {
@@ -161,29 +128,23 @@ export default function PlayerCard({
           fill="currentColor"
         />
       ),
-      value: Number(mvps ?? 0),
+      value: 0,
     },
 
-    ...(posicion === "Portero"
-      ? [
-          {
-            icon: (
-              <ShieldCheck
-                size={100}
-                className="text-white"
-              />
-            ),
-            value: Number(
-              porteriasCero ?? 0,
-            ),
-          },
-        ]
-      : []),
+    {
+      icon: (
+        <ShieldCheck
+          size={100}
+          className="text-white"
+        />
+      ),
+      value: 0,
+    },
   ].filter((stat) => stat.value > 0);
 
   return (
     <div
-      className="relative h-[1350px] w-[1080px] overflow-hidden bg-black"
+      className="relative h-[1350px] w-[1080px] overflow-hidden bg-[#062A63]"
       style={{
         isolation: "isolate",
       }}
@@ -208,7 +169,7 @@ export default function PlayerCard({
           opacity: POSITION.opacity,
           transform: `rotate(${POSITION.rotate}deg)`,
         }}
-        className="absolute z-[15] font-black uppercase leading-none text-white"
+        className="absolute z-[15] font-black uppercase leading-none text-yellow-400"
       >
         {posicionAbreviada}
       </h2>
@@ -224,7 +185,7 @@ export default function PlayerCard({
           opacity: LIGHT.opacity,
           transform: "translateX(-50%)",
         }}
-        className="absolute z-20 rounded-full bg-white blur-[170px]"
+        className="absolute z-20 rounded-full bg-yellow-400 blur-[170px]"
       />
 
       {/* DORSAL */}
@@ -257,7 +218,7 @@ export default function PlayerCard({
         {nombre}
       </h1>
 
-      {/* FOTO DEL JUGADOR */}
+      {/* FOTO */}
 
       <img
         src={foto}
@@ -308,9 +269,9 @@ export default function PlayerCard({
           opacity: FOOTER.opacity,
           transform: "translateX(-50%)",
         }}
-        className="absolute z-50 whitespace-nowrap uppercase tracking-[8px] text-white"
+        className="absolute z-50 whitespace-nowrap uppercase tracking-[8px] text-yellow-400"
       >
-        martincitas-web-beta.vercel.app
+        CABALLEROS
       </p>
     </div>
   );

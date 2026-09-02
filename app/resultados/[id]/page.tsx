@@ -59,12 +59,30 @@ export default async function MatchPage({
         stat.touchdowns_defensivos > 0
     );
 
+  /*
+   * COMPATIBILIDAD CON COMPONENTES
+   *
+   * Los componentes antiguos todavía esperan:
+   * player_id, nombre y goles.
+   *
+   * La información real de americano
+   * permanece en jugadoresConEstadisticas.
+   */
+
+  const goleadores = jugadoresConEstadisticas.map(
+    (stat) => ({
+      player_id: stat.player_id,
+      nombre: stat.nombre,
+      goles: stat.touchdowns,
+    })
+  );
+
   const mvp = null;
 
   return (
     <MatchView
       match={match}
-      goles={jugadoresConEstadisticas}
+      goles={goleadores}
       asistencias={[]}
       mvp={mvp}
     >
@@ -83,7 +101,7 @@ export default async function MatchPage({
           golesContra={
             match.goles_contra
           }
-          goleadores={jugadoresConEstadisticas}
+          goleadores={goleadores}
           ubicacion={
             match.ubicacion
           }
@@ -94,7 +112,7 @@ export default async function MatchPage({
         />
 
         <MatchTabs
-          goles={jugadoresConEstadisticas}
+          goles={goleadores}
           asistencias={[]}
           amarillas={[]}
           rojas={[]}

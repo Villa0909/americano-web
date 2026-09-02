@@ -20,17 +20,21 @@ export default async function Page({ params }: Props) {
     notFound();
   }
 
+  if (!player) {
+    notFound();
+  }
+
   return (
     <PlayerCard
       nombre={player.nombre}
       numero={player.numero}
       foto={player.foto}
       posicion={player.posicion}
-      partidos={player.partidos}
-      goles={player.goles}
-      asistencias={player.asistencias}
-      mvps={player.mvps ?? 0}
-      porteriasCero={player.porterias_cero ?? 0}
+      partidos={0}
+      goles={0}
+      asistencias={0}
+      mvps={0}
+      porteriasCero={0}
     />
   );
 }
