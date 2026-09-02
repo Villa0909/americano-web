@@ -5,8 +5,8 @@ import Navbar from "@/components/layout/Navbar";
 import NewsModal from "@/components/NewsModal";
 
 export const metadata: Metadata = {
-  title: "Martincitas C.F.",
-  description: "Sitio oficial de Martincitas Club de Futbol",
+  title: "Caballeros",
+  description: "Sitio oficial de Caballeros",
 };
 
 export const viewport: Viewport = {
