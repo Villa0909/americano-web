@@ -53,13 +53,21 @@ export async function createPlayer(
     | "touchdowns_defensivos"
   >
 ) {
-  const { data, error } = await supabase
-    .from("players")
-    .insert(player)
-    .select()
-    .single();
+  const response = await fetch("/api/admin/players", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(player),
+  });
 
-  if (error) throw error;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error || "No se pudo crear el jugador."
+    );
+  }
 
   return data as Player;
 }
